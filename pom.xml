@@ -21,10 +21,17 @@
     </build>
 
     <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+    <dependencies>
     <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongo-java-driver</artifactId>
         <version>3.4.1</version>
     </dependency>
-
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-ogm-core</artifactId>
+            <version>2.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+</dependencies>
 </project>
