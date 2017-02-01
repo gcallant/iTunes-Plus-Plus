@@ -4,7 +4,6 @@ package Values;
 //neo4j: https://neo4j.com/developer/guide-data-modeling/
 
 
-
 import ID3.ID3Object;
 
 import java.io.File;
@@ -25,7 +24,7 @@ import java.io.IOException;
  */
 public class ValueTester {
     public static void main(String...args){
-        File mediaFile = new File(".\\Blind Melon - No Rain.mp3");
+        File mediaFile = new File("src\\main\\resources\\Music\\Blind Melon - No Rain.mp3");
         ID3Object id3 = null;
 
         try {
@@ -47,18 +46,22 @@ public class ValueTester {
         importSong(song, file, discNo, track);
 //        importYear();
 
-        String fileLocation1 = querySong(song);
-        String fileLocation2 = querySong("poop mcGoop");
+        String fileQuery1 = querySong(song);
+        String fileQuery2 = querySong("poop mcGoop");
 
-        System.out.println(fileLocation1);
-        System.out.println(fileLocation2);
+//        Map<String, Object> params = MapUtil.map(song, song);
+//        GraphDatabaseService graphDB = new GraphDatabaseService();
+//        graphDB.executre(fileQuery1, params);
+
+        System.out.println(fileQuery1);
+        System.out.println(fileQuery2);
     }
 
     private static void importSong(String song, String file, String discNo, String track){
         StringBuilder query = new StringBuilder();
 
         query.append("CREATE (" + song + "):" + Label.SONG
-                + " { " + Prop.NAME + ": " + song + ", " + Prop.FILENAME+ ": "
+                + " {" + Prop.NAME + ": " + song + ", " + Prop.FILENAME+ ": "
                 + file);
 
         if(discNo != null){
@@ -69,14 +72,16 @@ public class ValueTester {
         }
 
         query.append("})");
+
+        System.out.println(query.toString());
     }
 
     private static String querySong(String song){
         StringBuilder query = new StringBuilder();
 
-        query.append("MATCH " + song + ":" + Label.SONG + ")");
-        query.append("\nWHERE " + song + "." + Prop.NAME + " = {" + song + "}");
-        query.append("\nRETURN " + song + "." + Prop.FILENAME);
+        query.append("MATCH (" + song + ":" + Label.SONG + ")");
+        query.append(" WHERE " + song + "." + Prop.NAME + " = {" + song + "}");
+        query.append(" RETURN " + song + "." + Prop.FILENAME);
 
         return query.toString();
     }
