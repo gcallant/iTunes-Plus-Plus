@@ -5,8 +5,8 @@ import java.io.IOException;
 
 public class Tester {
 
-	public static void main(String...args) {
-		File mediaFile = new File(".\\Blind Melon - No Rain.mp3");
+	public static void main(String...args) {//C:\Users\Ryan\Documents\GitHub\iTunes-Plus-Plus\src\main\resources\Music
+		File mediaFile = new File(".\\src\\main\\resources\\Music\\Blind Melon - No Rain.mp3");
 		ID3Object id3 = null;
 		
 		try {
