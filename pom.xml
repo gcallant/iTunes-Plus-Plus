@@ -4,6 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <neo4j.version>3.1.0</neo4j.version>
+    </properties>
+
     <groupId>CSCD533</groupId>
     <artifactId>iTunes++</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -13,18 +17,55 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
     <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+    <dependencies>
     <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongo-java-driver</artifactId>
         <version>3.4.1</version>
     </dependency>
+        <dependency>
+            <!-- This gives us the Procedure API our runtime code uses.
+                 We have a `provided` scope on it, because when this is
+                 deployed in a Neo4j Instance, the API will be provided
+                 by Neo4j. If you add non-Neo4j dependencies to this
+                 project, their scope should normally be `compile` -->
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>${neo4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
+        <!-- Test Dependencies -->
+        <dependency>
+            <!-- This is used for a utility that lets us start Neo4j with
+                 a specific Procedure, which is nice for writing tests. -->
+            <groupId>org.neo4j.test</groupId>
+            <artifactId>neo4j-harness</artifactId>
+            <version>${neo4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <!-- Used to send cypher statements to our procedure. -->
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>1.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+</dependencies>
 </project>

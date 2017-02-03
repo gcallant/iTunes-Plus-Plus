@@ -21,7 +21,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="gui" target="1.7" />
+      <module name="gui" target="1.8" />
       <module name="iTunes++" target="1.5" />
       <module name="neo4j-ogm" target="1.7" />
     </bytecodeTargetLevel>
