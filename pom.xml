@@ -44,9 +44,9 @@
     <!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
     <dependencies>
     <dependency>
-        <groupId>org.mongodb</groupId>
-        <artifactId>mongo-java-driver</artifactId>
-        <version>3.4.1</version>
+        <groupId>org.neo4j.driver</groupId>
+        <artifactId>neo4j-java-driver</artifactId>
+        <version>1.1.0</version>
     </dependency>
         <!-- tag::jdbc-dependency[] -->
         <dependency>
@@ -81,11 +81,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
