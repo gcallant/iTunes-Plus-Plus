@@ -9,7 +9,7 @@ import static org.neo4j.driver.v1.Values.parameters;
 public class Deleter {
 
     public static void main(String...args) {
-        Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("neo4j", "neo4j"));
+        Driver driver = GraphDatabase.driver("67.110.208.167:7474", AuthTokens.basic("ryan", "o#4uPUm-#BBx7G53Rt3$mj8FYa4!%_"));
         Session session = driver.session();
 
         session.run("CREATE (a:Person {name: {name}, title: {title}})",
