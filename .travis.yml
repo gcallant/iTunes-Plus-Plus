@@ -3,6 +3,8 @@ sudo: required
 before_script:
   - sudo apt-get update
   - sudo apt-get install lib32z1 lib32ncurses5
+services:
+  - neo4j  
 jdk:
   - oraclejdk8
 install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
