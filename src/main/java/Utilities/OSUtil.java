@@ -52,6 +52,16 @@ public class OSUtil
 
    public static File getExternalDirectory()
    {
+      if(EXTERNAL_DIRECTORY == null)
+      {
+         try
+         {
+            setExternalDirectory(new File("C:" + SEPARATOR + "data"));
+         }catch(OSException e)
+         {
+            logger.debug("Couldn't set external directory {}", e);
+         }
+      }
       return EXTERNAL_DIRECTORY;
    }
 
@@ -61,8 +71,7 @@ public class OSUtil
       if(externalDirectory != null)
       {
          //Can only be set to a directory in the parent directory- but can't be the parent or the cwd
-         if(! externalDirectory.equals(getCurrentDirectory()) && ! externalDirectory.equals(getParentDirectory()) &&
-                    externalDirectory.toString().startsWith(getParentDirectory().toString()))
+         if(! externalDirectory.equals(getCurrentDirectory()) && ! externalDirectory.equals(getParentDirectory()))
          {
             EXTERNAL_DIRECTORY = externalDirectory;
          }

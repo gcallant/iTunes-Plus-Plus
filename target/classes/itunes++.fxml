@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.*?><?import javafx.scene.canvas.Canvas?><?import javafx.scene.control.*?><?import javafx.scene.image.Image?><?import javafx.scene.image.ImageView?><?import javafx.scene.layout.*?><?import javafx.scene.text.*?>
-
-<Pane maxHeight="-Infinity"
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<Pane xmlns:fx="http://javafx.com/fxml/1"
+      maxHeight="-Infinity"
       maxWidth="-Infinity"
       minHeight="-Infinity"
       minWidth="-Infinity"
       prefHeight="768.0"
       prefWidth="1024.0"
       fx:controller="guiInterface.Controller"
-      xmlns="http://javafx.com/javafx/8.0.92"
-      xmlns:fx="http://javafx.com/fxml/1">
+      xmlns="http://javafx.com/javafx/8.0.92">
     <children>
         <HBox alignment="CENTER"
               layoutX="286.0"

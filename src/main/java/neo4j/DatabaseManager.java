@@ -62,6 +62,7 @@ public class DatabaseManager
       {
          databaseConnector.close();
       }
+      driver.close();
    }
 
    private static class DatabaseSingle
