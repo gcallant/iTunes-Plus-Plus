@@ -8,7 +8,7 @@
       minWidth="-Infinity"
       prefHeight="768.0"
       prefWidth="1024.0"
-      fx:controller="sample.Controller"
+      fx:controller="guiInterface.Controller"
       xmlns="http://javafx.com/javafx/8.0.92"
       xmlns:fx="http://javafx.com/fxml/1">
     <children>
