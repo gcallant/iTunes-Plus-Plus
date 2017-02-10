@@ -2,22 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6ed4d913-b860-4516-b59b-7ad1089fe6b5" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Values/ValueTester.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/sample/Controller.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/sample/Main.class" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/Values/ValueTester.java" afterPath="$PROJECT_DIR$/src/test/java/Values/ValueTester.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/sample/Controller.java" afterPath="$PROJECT_DIR$/src/main/java/guiInterface/Controller.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/sample/Main.java" afterPath="$PROJECT_DIR$/src/main/java/guiInterface/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ID3/ID3Object.class" afterPath="$PROJECT_DIR$/target/classes/ID3/ID3Object.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/ID3/Tester.class" afterPath="$PROJECT_DIR$/target/classes/ID3/Tester.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Values/Label.class" afterPath="$PROJECT_DIR$/target/classes/Values/Label.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Values/Prop.class" afterPath="$PROJECT_DIR$/target/classes/Values/Prop.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Values/Relation.class" afterPath="$PROJECT_DIR$/target/classes/Values/Relation.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gui.iml" afterPath="$PROJECT_DIR$/gui.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/itunes++.fxml" afterPath="$PROJECT_DIR$/src/main/resources/itunes++.fxml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/itunes++.fxml" afterPath="$PROJECT_DIR$/target/classes/itunes++.fxml" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
@@ -1036,8 +1026,16 @@
       <workItem from="1486610299224" duration="2644000" />
       <workItem from="1486615002268" duration="10192000" />
       <workItem from="1486677470385" duration="12361000" />
-      <workItem from="1486710365587" duration="299000" />
+      <workItem from="1486710365587" duration="453000" />
     </task>
+    <task id="LOCAL-00001" summary="Moved testing classes to test package">
+      <created>1486710808520</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1486710808520</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1073,7 +1071,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32888000" />
+    <option name="totallyTimeSpent" value="33042000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -1137,6 +1135,13 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Moved testing classes to test package" />
+    <option name="LAST_COMMIT_MESSAGE" value="Moved testing classes to test package" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
