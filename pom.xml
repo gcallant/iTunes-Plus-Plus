@@ -11,6 +11,7 @@
     <groupId>CSCD533</groupId>
     <artifactId>iTunes++</artifactId>
     <version>1.0-SNAPSHOT</version>
+
     <build>
         <plugins>
             <plugin>
@@ -92,5 +93,11 @@
             <artifactId>junit-jupiter-api</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
     </dependencies>
 </project>
