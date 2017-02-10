@@ -1,4 +1,4 @@
-package sample;
+package guiInterface;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +10,11 @@ import javafx.stage.Stage;
 
 public class Main extends Application
 {
+
+   public static void main(String[] args)
+   {
+      launch(args);
+   }
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -24,11 +29,5 @@ public class Main extends Application
       primaryStage.setWidth(screenBounds.getWidth());
       primaryStage.setHeight(screenBounds.getHeight());
       primaryStage.show();
-   }
-
-
-   public static void main(String[] args)
-   {
-      launch(args);
    }
 }
