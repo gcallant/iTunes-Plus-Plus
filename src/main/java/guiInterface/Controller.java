@@ -1,4 +1,4 @@
-package sample;
+package guiInterface;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -15,6 +15,15 @@ public class Controller
    private ImageView nextSongButton;
    @FXML
    private ImageView importButon;
+
+   @FXML
+   public static void showAlert(String header, String message, Alert.AlertType alertType)
+   {
+      Alert alert = new Alert(alertType);
+      alert.setHeaderText(header);
+      alert.setContentText(message);
+      alert.show();
+   }
 
    @FXML protected void handlePlayButtonAction(MouseEvent event)
    {
