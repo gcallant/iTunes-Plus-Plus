@@ -28,4 +28,8 @@ public class FileHandler {
             filesMatchingType.add(root);
         }
     }
+
+    public static void getAllFilesOfType(File root, List<String> type, List<File> filesMatchingType) {
+        type.forEach(E -> getAllFilesOfType(root, E, filesMatchingType));
+    }
 }

@@ -1,22 +1,22 @@
-package neo4j;
+package neo4j.connection;
 
-import org.neo4j.driver.v1.AuthTokens;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.*;
+
+import java.util.List;
+import java.util.Vector;
 
 import static org.neo4j.driver.v1.Values.parameters;
 
 /**
  * Makes and holds a connection to the neo4j db. Executes queries and
- * returns results.
+ * returns results. hahaha
  *
  * @author Josh Cotes
  */
 public class NeoCon {
 
-    Driver _dbDriver;
-    Session _session;
+    private Driver _dbDriver;
+    private Session _session;
 
     public NeoCon(String url, int port, String username, String password){
         _dbDriver = GraphDatabase.driver("bolt://"+url+":"+port, AuthTokens.basic(username, password));
@@ -28,4 +28,11 @@ public class NeoCon {
                 parameters( "name", "Arthur", "title", "King" ) );
     }
 
+    public Session getSession(){
+        return _session;
+    }
+
+    public StatementResult query(String query) {
+        return _session.run(query);
+    }
 }

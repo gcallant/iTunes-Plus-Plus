@@ -6,14 +6,14 @@ import java.io.File;
 import java.util.LinkedList;
 
 /**
- * Created by Kelvinzero on 2/10/2017.
+ * @author Josh Cotes
  */
 class FileHandlerTest {
+
     @Test
     void getAllFilesOfType() {
         LinkedList<File> files = new LinkedList<>();
         File root = new File("C:\\Users\\Josh Cotes\\Downloads");
-        FileHandler.getAllFilesOfType(root, ".pdf", files);
+        FileHandler.getAllFilesOfType(root, ".mp3", files);
     }
-
 }
