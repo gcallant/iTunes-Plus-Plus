@@ -66,6 +66,7 @@ public class ValueTester {
         System.out.println("Accessing database...");
         try{
             _driver = GraphDatabase.driver("bolt://67.110.208.167:7687", AuthTokens.basic("ryan", "o#4uPUm-#BBx7G53Rt3$mj8FYa4!%_"));
+//            _driver = GraphDatabase.driver("bolt://67.110.208.167:7474", AuthTokens.basic("ryan", "o#4uPUm-#BBx7G53Rt3$mj8FYa4!%_"));
             _session = _driver.session();
         } catch(ServiceUnavailableException e) {
             System.err.println(e.getLocalizedMessage());
@@ -76,7 +77,6 @@ public class ValueTester {
 
     private static void importSong(String song, String file, String discNo, String track){
         StringBuilder importQuery = new StringBuilder();
-        StringBuilder params = new StringBuilder();
 
         importQuery.append("CREATE (" + song + "):" + Label.SONG
                 + " {" + Prop.NAME + ": " + song + ", " + Prop.FILENAME+ ": "
