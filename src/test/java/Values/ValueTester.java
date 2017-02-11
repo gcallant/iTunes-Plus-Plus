@@ -53,10 +53,10 @@ public class ValueTester {
 //        importArtist();
 //        importComment();
 //        importComposer();
-//        importSong(song, file, discNo, track);
 //        importYear();
 
         importSong(song, file, discNo, track);
+
         querySong(song);
 
         _session.close();
