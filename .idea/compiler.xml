@@ -18,11 +18,14 @@
         <outputRelativeToContentRoot value="true" />
         <module name="gui" />
         <module name="iTunes++" />
+        <module name="iTunes-Plus-Plus" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="gui" target="1.8" />
       <module name="iTunes++" target="1.5" />
+      <module name="iTunes-Plus-Plus" target="1.8" />
+      <module name="neo4j-ogm" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

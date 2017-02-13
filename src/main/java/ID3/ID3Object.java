@@ -105,7 +105,11 @@ public class ID3Object {
 		
 		return discNo;
 	}
-	
+
+	public String getFile(){
+		return _afile.getFile().getAbsolutePath();
+	}
+
 	public String getTitle(){
 		String title = null;
 		try{
