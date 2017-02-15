@@ -22,6 +22,10 @@ import java.io.File;
  */
 public class DatabaseManager
 {
+   private final static String  _URL               = "localhost";
+   private final static String  _USERNAME          = "iTunes";
+   private final static String  _PASSWORD          = "iTunes";
+   private final static int     _PORT              = 7687;
    private static final String  SEPARATOR          = OSUtil.getSeparator();
    private static final File    EXTERNAL_DIRECTORY = OSUtil.getExternalDirectory();
    private final static String  RESOURCES          = EXTERNAL_DIRECTORY.getAbsolutePath();
@@ -29,11 +33,14 @@ public class DatabaseManager
    private              Driver  driver             = null;
    private              Session databaseConnector  = null;
    private Log dbLogger;
+   private static DatabaseManager INSTANCE = null;
 
-   private DatabaseManager()
+
+
+   private DatabaseManager(String url, int port, String username, String password)
    {
       log4JLogger.info("Creating connection to database");
-      driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("iTunes", "iTunes"));
+      driver = GraphDatabase.driver("bolt://"+url+":"+port, AuthTokens.basic(username, password));
       databaseConnector = driver.session();
       if(databaseConnector.isOpen())
       {
@@ -46,9 +53,19 @@ public class DatabaseManager
    }
 
    @org.jetbrains.annotations.Contract (pure = true)
-   public static DatabaseManager getInstance()
+   public static DatabaseManager getInstance(String url, int port, String username, String password) throws Exception
    {
-      return DatabaseSingle.INSTANCE;
+      if(INSTANCE == null)
+         INSTANCE = new DatabaseManager(url, port, username, password);
+      else
+         throw new IllegalAccessException("an instance of DatabaseManager has already been instantiated");
+      return INSTANCE;
+   }
+
+   public static DatabaseManager getInstance(){
+      if(INSTANCE == null)
+         INSTANCE = new DatabaseManager(_URL, _PORT, _USERNAME, _PASSWORD);
+      return INSTANCE;
    }
 
    public Session getDatabaseConnector()
@@ -63,10 +80,5 @@ public class DatabaseManager
          databaseConnector.close();
       }
       driver.close();
-   }
-
-   private static class DatabaseSingle
-   {
-      private static final DatabaseManager INSTANCE = new DatabaseManager();
    }
 }
