@@ -1,6 +1,5 @@
 package neo4j.query;
 
-import neo4j.connection.NeoCon;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -13,8 +12,8 @@ class ImporterTest {
 
     @Test
     void addRecursively() {
-        NeoCon connection = new NeoCon("localhost", 7687, "neo4j", "kaboom");
-        Importer importer = new Importer(connection);
+        //NeoCon connection = new NeoCon("localhost", 7687, "neo4j", "kaboom");
+        //Importer importer = new Importer(connection);
 
         LinkedList<String> extensions = new LinkedList<>();
         File root = new File("C:\\Users\\Josh Cotes\\Music");
@@ -23,7 +22,7 @@ class ImporterTest {
         extensions.add(".mp4");
         extensions.add(".wmv");
 
-        importer.addFolderRecursively(root, extensions);
+        //importer.addFolderRecursively(root, extensions);
 
     }
 }

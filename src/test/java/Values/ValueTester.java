@@ -78,41 +78,41 @@ public class ValueTester {
     private static void importSong(String song, String file, String discNo, String track){
         StringBuilder importQuery = new StringBuilder();
 
-        importQuery.append("CREATE (" + song + "):" + Label.SONG
-                + " {" + Prop.NAME + ": " + song + ", " + Prop.FILENAME+ ": "
+        importQuery.append("CREATE (" + song + "):" + Label.SONGNAME
+                + " {" + Prop.SONG_NAME + ": " + song + ", " + Prop.FILENAME+ ": "
                 + file);
 
         if((discNo != null) && (track != null)){
             importQuery.append(", " + Prop.DISC_NO + ": " + discNo);
-            importQuery.append(", " + Prop.TRACK + ": " + track + "})");
+            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK, track));
+                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK_NUM, track));
         }
         else if(discNo != null){
             importQuery.append(", " + Prop.DISC_NO + ": " + discNo + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo));
+                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo));
         }
         else if(track != null){
-            importQuery.append(", " + Prop.TRACK + ": " + track + "})");
+            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.NAME, song, Prop.FILENAME, file, Prop.TRACK, track));
+                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.TRACK_NUM, track));
         }
         else {
             _session.run(importQuery.toString(),
-                    parameters(Prop.NAME, song, Prop.FILENAME, file));
+                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file));
         }
     }
 
     private static void querySong(String song){
         StringBuilder query = new StringBuilder();
 
-        query.append("MATCH (" + song + ":" + Label.SONG + ")");
-        query.append(" WHERE " + song + "." + Prop.NAME + " = {" + song + "}");
+        query.append("MATCH (" + song + ":" + Label.SONGNAME + ")");
+        query.append(" WHERE " + song + "." + Prop.SONG_NAME + " = {" + song + "}");
         query.append(" RETURN " + song + "." + Prop.FILENAME);
 
         StatementResult result = _session.run(query.toString(),
-                parameters(Prop.NAME, song));
+                parameters(Prop.SONG_NAME, song));
         while (result.hasNext()) {
             Record record = result.next();
             System.out.println(record.get(Prop.FILENAME).asString() + " " + record.get(song).asString());

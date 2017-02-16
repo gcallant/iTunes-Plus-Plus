@@ -1,5 +1,6 @@
 package file_io;
 
+import Utilities.FileHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

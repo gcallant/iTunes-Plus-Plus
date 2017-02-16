@@ -24,10 +24,11 @@ public class DatabaseManagerTest
       session = databaseManager.getDatabaseConnector();
    }
 
+
    @Test
    public void insertionTest() throws Exception
    {
-      Assert.assertNotNull(session.run("CREATE (a:Person {name: {name}, title: {title}})",
+      Assert.assertNotNull(session.run("CREATE (a:Person { name: {name}, title: {title} })",
                                        parameters("name", "Arthur", "title", "King")));
    }
 
@@ -60,6 +61,6 @@ public class DatabaseManagerTest
    @After
    public void tearDown() throws Exception
    {
-
+      databaseManager = null;
    }
 }
