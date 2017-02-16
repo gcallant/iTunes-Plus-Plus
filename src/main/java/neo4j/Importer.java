@@ -38,16 +38,9 @@ public class Importer {
     }
 
     private String sanitizeString(String dirty) {
-
-        StringBuilder sb = new StringBuilder();
-        for (char c : dirty.toCharArray()) {
-            if (c == '"')
-                sb.append('\'');
-            else
-                sb.append(c);
-        }
-        return sb.toString();
+        return dirty.replace('\"', '\'');
     }
+
     /*
     System.out.println("Album: " + id3.getAlbum());
 		System.out.println("Artist: " + id3.getArtist());
@@ -68,10 +61,11 @@ public class Importer {
             if (i % 2 == 0)
                 query.append(triples[i - 1] + ":\"" + triples[i] + "\"");
             if (i % 2 == 1 && i < triples.length - 1)
-                query.append(", \n");
+                query.append(",");
         }
         query.append("})");
         _session.run(query.toString());
+        System.out.println(query.toString());
     }
 
 
@@ -87,7 +81,7 @@ public class Importer {
             String songName = sanitizeString(id3.getTitle());
             String track = sanitizeString(id3.getTrack());
             String year = sanitizeString(id3.getYear());
-
+            String fileName = song.getPath();
             // import artist info //////////
             if (!nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
                 createNode(Label.ARTIST,
@@ -109,9 +103,21 @@ public class Importer {
                         Prop.YEAR, year);
 
             ///////// import composer info //////////////
-            if(!nodeExists(Label.COMPOSER, Prop.COMPOSER_NAME, composer))
+            if(!composer.equals("null") && !nodeExists(Label.COMPOSER, Prop.COMPOSER_NAME, composer)) {
+
                 createNode(Label.COMPOSER,
                         Prop.COMPOSER_NAME, composer);
+
+                createRelationshipReciprocal(
+                        Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
+                        Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_COMPOSER
+                );
+
+                createRelationshipReciprocal(
+                        Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
+                        Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ALBUM
+                );
+            }
 
             createRelationshipReciprocal(
                     Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
@@ -128,15 +134,7 @@ public class Importer {
                     Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ALBUM
             );
 
-            createRelationshipReciprocal(
-                    Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
-                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_COMPOSER
-            );
 
-            createRelationshipReciprocal(
-                    Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
-                    Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ALBUM
-            );
         } catch (IOException filenotfound$) {
             filenotfound$.printStackTrace();
         }
