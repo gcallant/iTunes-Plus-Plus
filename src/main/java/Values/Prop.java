@@ -8,4 +8,5 @@ public class Prop {
     public final static String FILENAME = "location";
     public final static String NAME = "name";
     public final static String TRACK = "track";
+    public final static String COMMENT = "text";
 }

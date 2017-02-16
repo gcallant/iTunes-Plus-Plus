@@ -47,14 +47,31 @@ public class Importer {
 		System.out.println("ALL: " + id3.getAll());
 */
 
+    private void createNode(String label, String subject, String value){
+        _session.run("CREATE (a:"+ Label.ARTIST + " {" +  Prop.NAME + ": {" + Prop.NAME + "} })",
+                parameters(Prop.NAME, value));
+    }
+
+
     private void addSong(File song){
 
         try {
             ID3Object id3 = new ID3Object(song);
 
-            if(!nodeExists(Label.ARTIST, Prop.NAME, id3.getArtist()))
-                _session.run("CREATE (a:"+ Label.ARTIST + " {" +  Prop.NAME + ": {" + Prop.NAME + "} })",
-                        parameters(Prop.NAME, id3.getArtist()));
+            // if id3 artist info present
+            if(id3.getArtist() != null && !nodeExists(Label.ARTIST, Prop.NAME, id3.getArtist()))
+                createNode(Label.ARTIST, Prop.NAME, id3.getArtist());
+
+            // if id3 track info present
+            if(id3.getTrack() != null && !nodeExists(Label.SONG, Prop.NAME, id3.getTrack())){
+                createNode(Label.SONG, Prop.NAME, id3.getTrack());
+                if(id3.getComment() != null){ // if song has comment
+                    _session.run("CREATE (a:"+ Label.SONG + " {" +  Prop.NAME + ": {" + Prop.NAME + "}, "+
+                                    Prop.COMMENT + ": {"+ id3.getComment() +"  } })",
+                            parameters(Prop.NAME, id3.getTrack(), Prop.COMMENT, id3.getComment()));
+                }
+            }
+
         }
         catch (IOException filenotfound$){
             filenotfound$.printStackTrace();
