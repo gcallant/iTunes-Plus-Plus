@@ -84,9 +84,9 @@ public class ValueTester {
 
         if((discNo != null) && (track != null)){
             importQuery.append(", " + Prop.DISC_NO + ": " + discNo);
-            importQuery.append(", " + Prop.TRACK + ": " + track + "})");
+            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK, track));
+                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK_NUM, track));
         }
         else if(discNo != null){
             importQuery.append(", " + Prop.DISC_NO + ": " + discNo + "})");
@@ -94,9 +94,9 @@ public class ValueTester {
                     parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo));
         }
         else if(track != null){
-            importQuery.append(", " + Prop.TRACK + ": " + track + "})");
+            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.TRACK, track));
+                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.TRACK_NUM, track));
         }
         else {
             _session.run(importQuery.toString(),

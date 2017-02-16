@@ -11,3 +11,4 @@ public class Relation {
     public final static String HAS_SONG = "hasSong";
     public final static String HAS_YEAR = "hasYear";
 }
+ 

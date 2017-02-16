@@ -13,17 +13,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.neo4j.driver.v1.Values.ofEntity;
 import static org.neo4j.driver.v1.Values.parameters;
 
 /**
- * Created by Kelvinzero on 2/10/2017.
+ * @author Josh Cotes
  */
 public class Importer {
 
     private Session _session;
 
-    public Importer(Session session){
+    public Importer(Session session) {
         _session = session;
     }
 
@@ -38,6 +37,17 @@ public class Importer {
         songs.forEach(this::addSong);
     }
 
+    private String sanitizeString(String dirty) {
+
+        StringBuilder sb = new StringBuilder();
+        for (char c : dirty.toCharArray()) {
+            if (c == '"')
+                sb.append('\'');
+            else
+                sb.append(c);
+        }
+        return sb.toString();
+    }
     /*
     System.out.println("Album: " + id3.getAlbum());
 		System.out.println("Artist: " + id3.getArtist());
@@ -49,85 +59,113 @@ public class Importer {
 		System.out.println("ALL: " + id3.getAll());
 */
 
-    private void createNode(String...triples){
+    private void createNode(String... triples) {
 
         StringBuilder query = new StringBuilder();
 
-            query.append("CREATE (" + triples[0] + ":"+ triples[0] + " {");
-                    for(int i = 2; i < triples.length; i++){
-                        if(i % 2 == 0)
-                            query.append(triples[i-1] + ":\"" + triples[i] + "\"");
-                        if(i%2 == 1 && i < triples.length-1)
-                            query.append(", \n");
-                    }
-                    query.append("})");
+        query.append("CREATE (" + triples[0] + ":" + triples[0] + " {");
+        for (int i = 2; i < triples.length; i++) {
+            if (i % 2 == 0)
+                query.append(triples[i - 1] + ":\"" + triples[i] + "\"");
+            if (i % 2 == 1 && i < triples.length - 1)
+                query.append(", \n");
+        }
+        query.append("})");
         _session.run(query.toString());
     }
 
 
-    private void addSong(File song){
+    private void addSong(File song) {
 
         try {
             ID3Object id3 = new ID3Object(song);
 
-            String album = id3.getAlbum();
-            String artist = id3.getArtist();
-            String composer = id3.getComposer();
-            String comment = id3.getComment();
-            String songName = id3.getTitle();
-            String track = id3.getTrack();
-            String year = id3.getYear();
+            String album = sanitizeString(id3.getAlbum());
+            String artist = sanitizeString(id3.getArtist());
+            String composer = sanitizeString(id3.getComposer());
+            String comment = sanitizeString(id3.getComment());
+            String songName = sanitizeString(id3.getTitle());
+            String track = sanitizeString(id3.getTrack());
+            String year = sanitizeString(id3.getYear());
 
-            // if artist info present //////////
-            if(!artist.equals("null") && !nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
-                createNode(Label.ARTIST, Prop.ARTIST_NAME, artist);
+            // import artist info //////////
+            if (!nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
+                createNode(Label.ARTIST,
+                        Prop.ARTIST_NAME, artist);
 
-            // if track info present  /////////
-            if(!songName.equals("null")  && !nodeExists(Label.SONGNAME, Prop.SONG_TITLE, songName)){
+            // import song info  /////////
+            if (!nodeExists(Label.SONGNAME, Prop.SONG_NAME, songName))
+                createNode(Label.SONGNAME,
+                        Prop.SONG_NAME, songName,
+                        Prop.TRACK_NUM, track,
+                        Prop.COMMENT, comment,
+                        Prop.YEAR, year);
+                //TODO: add file info to song
 
-                createNode(Label.SONGNAME, Prop.SONG_TITLE, songName);
+            ///////// import album info ///////////////
+            if (!nodeExists(Label.ALBUM, Prop.ALBUM_NAME, album))
+                createNode(Label.ALBUM,
+                        Prop.ALBUM_NAME, album,
+                        Prop.YEAR, year);
 
-                // if song has comment
-                if(comment != null){
-                    createNode(Label.SONGNAME, Prop.SONG_NAME, songName,
-                            Prop.COMMENT, comment);
-                }
-                // if track and artist present, create reciprocal relationship
-                if(!artist.equals("null")){
-                    createRelationshipReciprocal(Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
-                            Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ARTIST);
-                }
-            }
-        }
-        catch (IOException filenotfound$){
+            ///////// import composer info //////////////
+            if(!nodeExists(Label.COMPOSER, Prop.COMPOSER_NAME, composer))
+                createNode(Label.COMPOSER,
+                        Prop.COMPOSER_NAME, composer);
+
+            createRelationshipReciprocal(
+                    Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
+                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ARTIST
+            );
+
+            createRelationshipReciprocal(
+                    Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ARTIST,
+                    Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_ALBUM
+            );
+
+            createRelationshipReciprocal(
+                    Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_SONG,
+                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ALBUM
+            );
+
+            createRelationshipReciprocal(
+                    Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
+                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_COMPOSER
+            );
+
+            createRelationshipReciprocal(
+                    Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
+                    Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ALBUM
+            );
+        } catch (IOException filenotfound$) {
             filenotfound$.printStackTrace();
         }
     }
 
     private void createRelationshipReciprocal(String label1, String property1, String value1, String relation,
-                                              String label2, String property2, String value2, String relation2){
+                                              String label2, String property2, String value2, String relation2) {
 
         createRelationship(label1, property1, value1, relation, label2, property2, value2);
         createRelationship(label2, property2, value2, relation2, label1, property1, value1);
     }
 
     private void createRelationship(String label, String property1, String value1, String relation,
-                                    String label2, String property2, String value2){
+                                    String label2, String property2, String value2) {
 
-        _session.run("MATCH  (one:"+label+" {"+property1+":\"" + value1 +"\"} )" +
-                "MATCH  (two:"+label2+" {"+property2+":\"" + value2 +"\"} )" +
-                "CREATE (one)-["+ relation+":" + relation + "]" +
+        _session.run("MATCH  (one:" + label + " {" + property1 + ":\"" + value1 + "\"} )" +
+                "MATCH  (two:" + label2 + " {" + property2 + ":\"" + value2 + "\"} )" +
+                "CREATE (one)-[" + relation + ":" + relation + "]" +
                 "->(two)");
     }
 
-    private boolean nodeExists(String label, String subject, String value){
+    private boolean nodeExists(String label, String subject, String value) {
 
-        String query = "MATCH (a:" + label + ") WHERE a."+subject+" = {"+subject+"} " +
-                "RETURN a."+subject+" AS "+ subject;
-        StatementResult result = _session.run("MATCH (a:" + label + ") WHERE a."+subject+" = {"+subject+"} " +
-                        "RETURN a."+subject+" AS "+ subject,
+        String query = "MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
+                "RETURN a." + subject + " AS " + subject;
+        StatementResult result = _session.run("MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
+                        "RETURN a." + subject + " AS " + subject,
                 parameters(subject, value));
-        if(result.hasNext())
+        if (result.hasNext())
             return true;
         return false;
     }

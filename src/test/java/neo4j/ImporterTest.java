@@ -36,7 +36,7 @@ public class ImporterTest {
         songFiles.add(".wmv");
         songFiles.add(".mpeg");
 
-        importer.addFolderRecursively(new File("C:\\Users\\Josh\\Music"), songFiles);
+        importer.addFolderRecursively(new File("C:\\Users\\Josh Cotes\\Music"), songFiles);
     }
 
 }
