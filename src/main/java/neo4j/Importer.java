@@ -4,6 +4,7 @@ import ID3.ID3Object;
 import Utilities.FileHandler;
 import Values.Label;
 import Values.Prop;
+import Values.Relation;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.neo4j.driver.v1.Values.ofEntity;
 import static org.neo4j.driver.v1.Values.parameters;
 
 /**
@@ -47,9 +49,19 @@ public class Importer {
 		System.out.println("ALL: " + id3.getAll());
 */
 
-    private void createNode(String label, String subject, String value){
-        _session.run("CREATE (a:"+ Label.ARTIST + " {" +  Prop.NAME + ": {" + Prop.NAME + "} })",
-                parameters(Prop.NAME, value));
+    private void createNode(String...triples){
+
+        StringBuilder query = new StringBuilder();
+
+            query.append("CREATE (" + triples[0] + ":"+ triples[0] + " {");
+                    for(int i = 2; i < triples.length; i++){
+                        if(i % 2 == 0)
+                            query.append(triples[i-1] + ":\"" + triples[i] + "\"");
+                        if(i%2 == 1 && i < triples.length-1)
+                            query.append(", \n");
+                    }
+                    query.append("})");
+        _session.run(query.toString());
     }
 
 
@@ -58,24 +70,54 @@ public class Importer {
         try {
             ID3Object id3 = new ID3Object(song);
 
-            // if id3 artist info present
-            if(id3.getArtist() != null && !nodeExists(Label.ARTIST, Prop.NAME, id3.getArtist()))
-                createNode(Label.ARTIST, Prop.NAME, id3.getArtist());
+            String album = id3.getAlbum();
+            String artist = id3.getArtist();
+            String composer = id3.getComposer();
+            String comment = id3.getComment();
+            String songName = id3.getTitle();
+            String track = id3.getTrack();
+            String year = id3.getYear();
 
-            // if id3 track info present
-            if(id3.getTrack() != null && !nodeExists(Label.SONG, Prop.NAME, id3.getTrack())){
-                createNode(Label.SONG, Prop.NAME, id3.getTrack());
-                if(id3.getComment() != null){ // if song has comment
-                    _session.run("CREATE (a:"+ Label.SONG + " {" +  Prop.NAME + ": {" + Prop.NAME + "}, "+
-                                    Prop.COMMENT + ": {"+ id3.getComment() +"  } })",
-                            parameters(Prop.NAME, id3.getTrack(), Prop.COMMENT, id3.getComment()));
+            // if artist info present //////////
+            if(!artist.equals("null") && !nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
+                createNode(Label.ARTIST, Prop.ARTIST_NAME, artist);
+
+            // if track info present  /////////
+            if(!songName.equals("null")  && !nodeExists(Label.SONGNAME, Prop.SONG_TITLE, songName)){
+
+                createNode(Label.SONGNAME, Prop.SONG_TITLE, songName);
+
+                // if song has comment
+                if(comment != null){
+                    createNode(Label.SONGNAME, Prop.SONG_NAME, songName,
+                            Prop.COMMENT, comment);
+                }
+                // if track and artist present, create reciprocal relationship
+                if(!artist.equals("null")){
+                    createRelationshipReciprocal(Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
+                            Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ARTIST);
                 }
             }
-
         }
         catch (IOException filenotfound$){
             filenotfound$.printStackTrace();
         }
+    }
+
+    private void createRelationshipReciprocal(String label1, String property1, String value1, String relation,
+                                              String label2, String property2, String value2, String relation2){
+
+        createRelationship(label1, property1, value1, relation, label2, property2, value2);
+        createRelationship(label2, property2, value2, relation2, label1, property1, value1);
+    }
+
+    private void createRelationship(String label, String property1, String value1, String relation,
+                                    String label2, String property2, String value2){
+
+        _session.run("MATCH  (one:"+label+" {"+property1+":\"" + value1 +"\"} )" +
+                "MATCH  (two:"+label2+" {"+property2+":\"" + value2 +"\"} )" +
+                "CREATE (one)-["+ relation+":" + relation + "]" +
+                "->(two)");
     }
 
     private boolean nodeExists(String label, String subject, String value){
