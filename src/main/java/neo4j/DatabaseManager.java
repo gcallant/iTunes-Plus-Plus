@@ -22,10 +22,10 @@ import java.io.File;
  */
 public class DatabaseManager
 {
-   private final static String  _URL               = "localhost";
-   private final static String  _USERNAME          = "iTunes";
-   private final static String  _PASSWORD          = "iTunes";
-   private final static int     _PORT              = 7687;
+   public  final static String  _URL               = "localhost";
+   public  final static String  _USERNAME          = "iTunes";
+   public  final static String  _PASSWORD          = "iTunes";
+   public  final static int     _PORT              = 7687;
    private static final String  SEPARATOR          = OSUtil.getSeparator();
    private static final File    EXTERNAL_DIRECTORY = OSUtil.getExternalDirectory();
    private final static String  RESOURCES          = EXTERNAL_DIRECTORY.getAbsolutePath();
@@ -53,12 +53,10 @@ public class DatabaseManager
    }
 
    @org.jetbrains.annotations.Contract (pure = true)
-   public static DatabaseManager getInstance(String url, int port, String username, String password) throws Exception
+   public static DatabaseManager getInstance(String url, int port, String username, String password)
    {
       if(INSTANCE == null)
          INSTANCE = new DatabaseManager(url, port, username, password);
-      else
-         throw new IllegalAccessException("an instance of DatabaseManager has already been instantiated");
       return INSTANCE;
    }
 
