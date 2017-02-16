@@ -5,11 +5,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Values/Label.class" afterPath="$PROJECT_DIR$/target/classes/Values/Label.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Values/Prop.class" afterPath="$PROJECT_DIR$/target/classes/Values/Prop.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Values/Prop.java" afterPath="$PROJECT_DIR$/src/main/java/Values/Prop.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Values/Relation.java" afterPath="$PROJECT_DIR$/src/main/java/Values/Relation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/neo4j/Importer.java" afterPath="$PROJECT_DIR$/src/main/java/neo4j/Importer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/Values/ValueTester.java" afterPath="$PROJECT_DIR$/src/test/java/Values/ValueTester.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/neo4j/ImporterTest.java" afterPath="$PROJECT_DIR$/src/test/java/neo4j/ImporterTest.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="C:/Libraries/target/" />
@@ -969,7 +964,7 @@
       <workItem from="1487230326418" duration="19676000" />
       <workItem from="1487264212678" duration="128000" />
       <workItem from="1487264432386" duration="280000" />
-      <workItem from="1487267218931" duration="3440000" />
+      <workItem from="1487267218931" duration="3482000" />
     </task>
     <task id="LOCAL-00001" summary="Still having troubles with my neo4j api.. Thought if I commit this Deleter class, maybe it will see the api.">
       <created>1486532177558</created>
@@ -1013,7 +1008,14 @@
       <option name="project" value="LOCAL" />
       <updated>1487236515821</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="full library add with relationships for songs working&#10;">
+      <created>1487270717798</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1487270717798</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1049,7 +1051,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26239000" />
+    <option name="totallyTimeSpent" value="26281000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-14" y="-14" width="2764" height="1762" extended-state="6" />
@@ -1103,7 +1105,8 @@
     <MESSAGE value="Updated ValueTester&#10;" />
     <MESSAGE value="adds artist nodes to database&#10;queries for existing nodes to prevent duplicate adds&#10;" />
     <MESSAGE value="adds artist and track to database as nodes&#10;if track has comment, adds as second field to track node" />
-    <option name="LAST_COMMIT_MESSAGE" value="adds artist and track to database as nodes&#10;if track has comment, adds as second field to track node" />
+    <MESSAGE value="full library add with relationships for songs working&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="full library add with relationships for songs working&#10;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
