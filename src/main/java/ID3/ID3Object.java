@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Filter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -22,7 +26,6 @@ import org.jaudiotagger.tag.TagField;
 public class ID3Object {
 	private AudioFile _afile;
 	private Tag _tag;
-//	private AudioHeader _aheader;
 	
 	public ID3Object(File mediaFile) throws IOException {
 		try {
@@ -32,7 +35,6 @@ public class ID3Object {
 			throw new IOException("Cannot read media file: " + mediaFile.getName());
 		}
 		_tag = _afile.getTag();
-//		_aheader = _afile.getAudioHeader();
 	}
 
 	//-------------------------------------------------------------------------

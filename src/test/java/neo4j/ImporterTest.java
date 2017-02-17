@@ -1,18 +1,13 @@
 package neo4j;
 
-import io.netty.util.internal.RecyclableArrayList;
-import org.junit.Assert;
+import org.jaudiotagger.audio.AudioFileIO;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.driver.v1.Record;
-import org.neo4j.driver.v1.StatementResult;
-import scala.collection.mutable.ArrayLike;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
-import static org.junit.Assert.*;
-import static org.neo4j.driver.v1.Values.parameters;
 
 /**
  * Created by Josh on 2/16/2017.
@@ -24,6 +19,7 @@ public class ImporterTest {
     @Before
     public void setUp() throws Exception{
         _NEOCONNECTION = DatabaseManager.getInstance(DatabaseManager._URL, DatabaseManager._PORT, "neo4j", "kaboom");
+        //_NEOCONNECTION.getDatabaseConnector().run("MATCH (n) DETACH DELETE n");
     }
 
     @Test
@@ -36,7 +32,8 @@ public class ImporterTest {
         songFiles.add(".wmv");
         songFiles.add(".mpeg");
 
-        importer.addFolderRecursively(new File("C:\\Users\\Josh Cotes\\Music"), songFiles);
+        AudioFileIO.logger.setLevel(Level.OFF);
+        importer.addFolderRecursively("C:\\Users\\Josh\\Music", songFiles);
     }
 
 }
