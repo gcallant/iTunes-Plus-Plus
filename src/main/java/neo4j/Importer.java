@@ -26,31 +26,25 @@ public class Importer {
         _session = session;
     }
 
-    public void addFolderRecursively(File root, List<String> fileExtensions) {
+    public void addFolderRecursively(String root, List<String> fileExtensions) {
 
-        ArrayList<File> files = new ArrayList<>();
-        fileExtensions.parallelStream().forEach(E -> FileHandler.getAllFilesOfType(root, E, files));
-        addSongs(files);
+        ArrayList<String> filePaths = new ArrayList<>();
+        ArrayList<ID3Object> id3s = new ArrayList<>();
+
+        fileExtensions.parallelStream().forEach(E -> FileHandler.getAllFilesAndID3s(new File(root), E, filePaths, id3s));
+        addSongs(filePaths, id3s);
     }
 
-    private void addSongs(List<File> songs) {
-        songs.forEach(this::addSong);
+    private void addSongs(List<String> songPaths, List<ID3Object> id3s) {
+
+        int i = 0;
+        for (String songPath : songPaths)
+            addSong(songPath, id3s.get(i++));
     }
 
     private String sanitizeString(String dirty) {
-        return dirty.replace('\"', '\'');
+        return dirty.replace('\"', '\'').replace("\\", "//");
     }
-
-    /*
-    System.out.println("Album: " + id3.getAlbum());
-		System.out.println("Artist: " + id3.getArtist());
-		System.out.println("Comment: " + id3.getComment());
-		System.out.println("Composer: " + id3.getComposer());
-		System.out.println("Title: " + id3.getTitle());
-		System.out.println("Track: " + id3.getTrack());
-		System.out.println("Year: " + id3.getYear());
-		System.out.println("ALL: " + id3.getAll());
-*/
 
     private void createNode(String... triples) {
 
@@ -65,79 +59,65 @@ public class Importer {
         }
         query.append("})");
         _session.run(query.toString());
-        System.out.println(query.toString());
     }
 
 
-    private void addSong(File song) {
+    private void addSong(String songPath, ID3Object id3) {
 
-        try {
-            ID3Object id3 = new ID3Object(song);
+        String album = sanitizeString(id3.getAlbum());
+        String artist = sanitizeString(id3.getArtist());
+        String composer = sanitizeString(id3.getComposer());
+        String comment = sanitizeString(id3.getComment());
+        String songName = sanitizeString(id3.getTitle());
+        String track = sanitizeString(id3.getTrack());
+        String year = sanitizeString(id3.getYear());
+        String fileName = sanitizeString(songPath);
 
-            String album = sanitizeString(id3.getAlbum());
-            String artist = sanitizeString(id3.getArtist());
-            String composer = sanitizeString(id3.getComposer());
-            String comment = sanitizeString(id3.getComment());
-            String songName = sanitizeString(id3.getTitle());
-            String track = sanitizeString(id3.getTrack());
-            String year = sanitizeString(id3.getYear());
-            String fileName = song.getPath();
-            // import artist info //////////
-            if (!nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
-                createNode(Label.ARTIST,
-                        Prop.ARTIST_NAME, artist);
+        // import artist info //////////
+        if (!nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
+            createNode(Label.ARTIST,
+                    Prop.ARTIST_NAME, artist);
 
-            // import song info  /////////
-            if (!nodeExists(Label.SONGNAME, Prop.SONG_NAME, songName))
-                createNode(Label.SONGNAME,
-                        Prop.SONG_NAME, songName,
-                        Prop.TRACK_NUM, track,
-                        Prop.COMMENT, comment,
-                        Prop.YEAR, year);
-                //TODO: add file info to song
+        // import song info  /////////
+        if (!nodeExists(Label.SONGNAME, Prop.SONG_NAME, songName))
+            createNode(Label.SONGNAME,
+                    Prop.SONG_NAME, songName,
+                    Prop.TRACK_NUM, track,
+                    Prop.COMMENT, comment,
+                    Prop.YEAR, year,
+                    Prop.COMPOSER_NAME, composer,
+                    Prop.FILENAME, fileName);
 
-            ///////// import album info ///////////////
-            if (!nodeExists(Label.ALBUM, Prop.ALBUM_NAME, album))
-                createNode(Label.ALBUM,
-                        Prop.ALBUM_NAME, album,
-                        Prop.YEAR, year);
+        ///////// import album info ///////////////
+        if (!nodeExists(Label.ALBUM, Prop.ALBUM_NAME, album))
+            createNode(Label.ALBUM,
+                    Prop.ALBUM_NAME, album,
+                    Prop.YEAR, year);
 
-            ///////// import composer info //////////////
-            if(!composer.equals("null") && !nodeExists(Label.COMPOSER, Prop.COMPOSER_NAME, composer)) {
-
-                createNode(Label.COMPOSER,
-                        Prop.COMPOSER_NAME, composer);
-
-                createRelationshipReciprocal(
-                        Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
-                        Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_COMPOSER
-                );
-
-                createRelationshipReciprocal(
-                        Label.COMPOSER, Prop.COMPOSER_NAME, composer, Relation.HAS_SONG,
-                        Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ALBUM
-                );
-            }
-
+        // create relationship ARTIST/SONG
+        if (!relationshipExists(
+                Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
+                Label.SONGNAME, Prop.SONG_NAME, songName))
             createRelationshipReciprocal(
                     Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
-                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ARTIST
-            );
+                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ARTIST);
 
+        // create relationship ALBUM/ARTIST
+        if (!relationshipExists(
+                Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ARTIST,
+                Label.ARTIST, Prop.ARTIST_NAME, artist))
             createRelationshipReciprocal(
                     Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                    Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_ALBUM
-            );
+                    Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_ALBUM);
 
+        // create relationship ALBUM/SONG
+        if (!relationshipExists(
+                Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_SONG,
+                Label.SONGNAME, Prop.SONG_NAME, songName))
             createRelationshipReciprocal(
                     Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_SONG,
                     Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ALBUM
             );
-
-
-        } catch (IOException filenotfound$) {
-            filenotfound$.printStackTrace();
-        }
     }
 
     private void createRelationshipReciprocal(String label1, String property1, String value1, String relation,
@@ -166,5 +146,18 @@ public class Importer {
         if (result.hasNext())
             return true;
         return false;
+    }
+
+    private boolean relationshipExists(String label, String subject, String value, String relationship,
+                                       String label2, String subject2, String value2) {
+
+        String query = "MATCH (" + label + ":" + label + ")-[:" + relationship + "]->(" + label2 + ":" + label2 + ") " +
+                "WHERE " + label + "." + subject + " = \"" + value + "\" " +
+                "AND " + label2 + "." + subject2 + " = \"" + value2 + "\" " +
+                "RETURN " + label + "." + subject + ", " + label2 + "." + subject2;
+
+        StatementResult result = _session.run(query);
+
+        return result.hasNext();
     }
 }
