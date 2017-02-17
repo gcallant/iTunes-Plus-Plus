@@ -6,16 +6,18 @@ import Values.Label;
 import Values.Prop;
 import Values.Relation;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.neo4j.driver.v1.Values.parameters;
 
 /**
+ * Handles importing songs ID3 and file information into database.
+ * Adds appropriate nodes and relationships, doesn't add duplicates of
+ * either.
+ *
  * @author Josh Cotes
  */
 public class Importer {
@@ -26,15 +28,42 @@ public class Importer {
         _session = session;
     }
 
+    /**
+     * Retrieves all files from all folders recursively from given file root.
+     * Searches each time per file extension in list.
+     *
+     * @param root - file path
+     * @param fileExtensions - list of file extensions to search
+     */
     public void addFolderRecursively(String root, List<String> fileExtensions) {
 
         ArrayList<String> filePaths = new ArrayList<>();
         ArrayList<ID3Object> id3s = new ArrayList<>();
-
-        fileExtensions.parallelStream().forEach(E -> FileHandler.getAllFilesAndID3s(new File(root), E, filePaths, id3s));
+        fileExtensions.parallelStream().forEach(E -> addFolderRecursively(root, E));
         addSongs(filePaths, id3s);
     }
 
+    /**
+     * Retrieves all files from all folders recursively from given file root.
+     * Searches for file extension.
+     *
+     * @param root - file path
+     * @param fileExtension - file extension to search
+     */
+    public void addFolderRecursively(String root, String fileExtension){
+
+        ArrayList<String> filePaths = new ArrayList<>();
+        ArrayList<ID3Object> id3s = new ArrayList<>();
+        FileHandler.getAllFilesAndID3s(new File(root), fileExtension, filePaths, id3s);
+        addSongs(filePaths, id3s);
+    }
+
+    /**
+     * Add all songs from list using id3s to the database.
+     *
+     * @param songPaths - list of song paths
+     * @param id3s - list of id3 tags
+     */
     private void addSongs(List<String> songPaths, List<ID3Object> id3s) {
 
         int i = 0;
@@ -42,11 +71,17 @@ public class Importer {
             addSong(songPath, id3s.get(i++));
     }
 
+    /**
+     * Sanitizes strings for database entry.
+     *
+     * @param dirty - the dirty string
+     * @return - clean string
+     */
     private String sanitizeString(String dirty) {
         return dirty.replace('\"', '\'').replace("\\", "//");
     }
 
-    private void createNode(String... triples) {
+    public void createNode(String... triples) {
 
         StringBuilder query = new StringBuilder();
 
@@ -62,7 +97,14 @@ public class Importer {
     }
 
 
-    private void addSong(String songPath, ID3Object id3) {
+    /**
+     * Adds a song's ID3 information to the database with the appropriate relationships.
+     * Prevents duplicate node and relationships from being created.
+     *
+     * @param songPath - path to the song file
+     * @param id3 - the ID3Object
+     */
+    public void addSong(String songPath, ID3Object id3) {
 
         String album = sanitizeString(id3.getAlbum());
         String artist = sanitizeString(id3.getArtist());
@@ -120,44 +162,78 @@ public class Importer {
             );
     }
 
-    private void createRelationshipReciprocal(String label1, String property1, String value1, String relation,
+    /**
+     * Creates a reciprocal relationship between two nodes given properties.
+     *
+     * @param label1 - first node label
+     * @param property1 - first node subject
+     * @param value1 - first node subject value
+     * @param relationship - relationship to second node
+     * @param label2 - second node label
+     * @param property2 - second node subject
+     * @param value2 - second node value
+     */
+    public void createRelationshipReciprocal(String label1, String property1, String value1, String relationship,
                                               String label2, String property2, String value2, String relation2) {
 
-        createRelationship(label1, property1, value1, relation, label2, property2, value2);
+        createRelationship(label1, property1, value1, relationship, label2, property2, value2);
         createRelationship(label2, property2, value2, relation2, label1, property1, value1);
     }
 
-    private void createRelationship(String label, String property1, String value1, String relation,
+    /**
+     * Creates a relationship from the first node to the second.
+     *
+     * @param label1 - first node label
+     * @param property1 - first node subject
+     * @param value1 - first node subject value
+     * @param relationship - relationship to second node
+     * @param label2 - second node label
+     * @param property2 - second node subject
+     * @param value2 - second node value
+     */
+    public void createRelationship(String label1, String property1, String value1, String relationship,
                                     String label2, String property2, String value2) {
 
-        _session.run("MATCH  (one:" + label + " {" + property1 + ":\"" + value1 + "\"} )" +
+        _session.run("MATCH  (one:" + label1 + " {" + property1 + ":\"" + value1 + "\"} )" +
                 "MATCH  (two:" + label2 + " {" + property2 + ":\"" + value2 + "\"} )" +
-                "CREATE (one)-[" + relation + ":" + relation + "]" +
+                "CREATE (one)-[" + relationship + ":" + relationship + "]" +
                 "->(two)");
     }
 
-    private boolean nodeExists(String label, String subject, String value) {
+    /**
+     * Returns true if there exists a node with the given parameters
+     * @param label - the node label
+     * @param subject - the subject
+     * @param value - the subject value
+     * @return - true if node exists
+     */
+    public boolean nodeExists(String label, String subject, String value) {
 
-        String query = "MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
-                "RETURN a." + subject + " AS " + subject;
-        StatementResult result = _session.run("MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
+        return _session.run("MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
                         "RETURN a." + subject + " AS " + subject,
-                parameters(subject, value));
-        if (result.hasNext())
-            return true;
-        return false;
+                parameters(subject, value)).hasNext();
     }
 
-    private boolean relationshipExists(String label, String subject, String value, String relationship,
-                                       String label2, String subject2, String value2) {
+    /**
+     * Returns true if there exists a specific relationship between two nodes.
+     *
+     * @param label1 - first node label
+     * @param property1 - first node subject
+     * @param value1 - first node subject value
+     * @param relationship - relationship to second node
+     * @param label2 - second node label
+     * @param property2 - second node subject
+     * @param value2 - second node value
+     * @return - true if that relationship exists
+     */
+    public boolean relationshipExists(String label1, String property1, String value1, String relationship,
+                                       String label2, String property2, String value2) {
 
-        String query = "MATCH (" + label + ":" + label + ")-[:" + relationship + "]->(" + label2 + ":" + label2 + ") " +
-                "WHERE " + label + "." + subject + " = \"" + value + "\" " +
-                "AND " + label2 + "." + subject2 + " = \"" + value2 + "\" " +
-                "RETURN " + label + "." + subject + ", " + label2 + "." + subject2;
+        String query = "MATCH (" + label1 + ":" + label1 + ")-[:" + relationship + "]->(" + label2 + ":" + label2 + ") " +
+                "WHERE " + label1 + "." + property1 + " = \"" + value1 + "\" " +
+                "AND " + label2 + "." + property2 + " = \"" + value2 + "\" " +
+                "RETURN " + label1 + "." + property1 + ", " + label2 + "." + property2;
 
-        StatementResult result = _session.run(query);
-
-        return result.hasNext();
+       return _session.run(query).hasNext();
     }
 }
