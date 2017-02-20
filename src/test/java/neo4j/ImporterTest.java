@@ -19,7 +19,7 @@ public class ImporterTest {
     @Before
     public void setUp() throws Exception{
         _NEOCONNECTION = DatabaseManager.getInstance(DatabaseManager._URL, DatabaseManager._PORT, "neo4j", "kaboom");
-        //_NEOCONNECTION.getDatabaseConnector().run("MATCH (n) DETACH DELETE n");
+        _NEOCONNECTION.getDatabaseConnector().run("MATCH (n) DETACH DELETE n");
     }
 
     @Test

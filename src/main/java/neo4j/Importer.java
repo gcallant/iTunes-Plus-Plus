@@ -3,7 +3,7 @@ package neo4j;
 import ID3.ID3Object;
 import Utilities.FileHandler;
 import Values.Label;
-import Values.Prop;
+import Values.Property;
 import Values.Relation;
 import org.neo4j.driver.v1.Session;
 
@@ -113,52 +113,101 @@ public class Importer {
         String songName = sanitizeString(id3.getTitle());
         String track = sanitizeString(id3.getTrack());
         String year = sanitizeString(id3.getYear());
+        String genre = sanitizeString(id3.getGenre());
         String fileName = sanitizeString(songPath);
 
+
         // import artist info //////////
-        if (!nodeExists(Label.ARTIST, Prop.ARTIST_NAME, artist))
+        if (!nodeExists(Label.ARTIST, Property.ARTIST_NAME, artist))
             createNode(Label.ARTIST,
-                    Prop.ARTIST_NAME, artist);
+                    Property.ARTIST_NAME, artist);
 
         // import song info  /////////
-        if (!nodeExists(Label.SONGNAME, Prop.SONG_NAME, songName))
+        if (!nodeExists(Label.SONGNAME, Property.SONG_NAME, songName))
             createNode(Label.SONGNAME,
-                    Prop.SONG_NAME, songName,
-                    Prop.TRACK_NUM, track,
-                    Prop.COMMENT, comment,
-                    Prop.YEAR, year,
-                    Prop.COMPOSER_NAME, composer,
-                    Prop.FILENAME, fileName);
+                    Property.SONG_NAME, songName,
+                    Property.TRACK_NUM, track,
+                    Property.COMMENT, comment,
+                    Property.YEAR, year,
+                    Property.COMPOSER_NAME, composer,
+                    Property.FILENAME, fileName);
 
         ///////// import album info ///////////////
-        if (!nodeExists(Label.ALBUM, Prop.ALBUM_NAME, album))
+        if (!nodeExists(Label.ALBUM, Property.ALBUM_NAME, album))
             createNode(Label.ALBUM,
-                    Prop.ALBUM_NAME, album,
-                    Prop.YEAR, year);
+                    Property.ALBUM_NAME, album,
+                    Property.YEAR, year);
+
+        ////////// import genre info ////////////////
+        if (!nodeExists(Label.GENRE, Property.GENRE_NAME, genre))
+            createNode(Label.GENRE,
+                    Property.GENRE_NAME, genre);
+
+        // create relationship ARTIST/GENRE
+        if(!relationshipExists(
+                Label.GENRE, Property.GENRE_NAME, genre,
+                Relation.HAS_ARTIST,
+                Label.ARTIST, Property.ARTIST_NAME, artist
+        ))
+            createRelationshipReciprocal(
+                    Label.GENRE, Property.GENRE_NAME, genre,
+                    Relation.HAS_ARTIST,
+                    Label.ARTIST, Property.ARTIST_NAME, artist,
+                    Relation.HAS_GENRE
+            );
+
+        // create relationship SONG/GENRE
+        if(!relationshipExists(
+                Label.GENRE, Property.GENRE_NAME, genre,
+                Relation.HAS_ARTIST,
+                Label.SONGNAME, Property.SONG_NAME, songName
+        ))
+            createRelationshipReciprocal(
+                    Label.GENRE, Property.GENRE_NAME, genre,
+                    Relation.HAS_SONG,
+                    Label.SONGNAME, Property.SONG_NAME, songName,
+                    Relation.HAS_GENRE
+            );
+
+        // create relationship ALBUM/GENRE
+        if(!relationshipExists(
+                Label.GENRE, Property.GENRE_NAME, genre,
+                Relation.HAS_ARTIST,
+                Label.ALBUM, Property.ALBUM_NAME, album
+        ))
+            createRelationshipReciprocal(
+                    Label.GENRE, Property.GENRE_NAME, genre,
+                    Relation.HAS_ALBUM,
+                    Label.ALBUM, Property.ALBUM_NAME, album,
+                    Relation.HAS_GENRE
+            );
 
         // create relationship ARTIST/SONG
         if (!relationshipExists(
-                Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
-                Label.SONGNAME, Prop.SONG_NAME, songName))
+                Label.ARTIST, Property.ARTIST_NAME, artist,
+                Relation.HAS_SONG,
+                Label.SONGNAME, Property.SONG_NAME, songName))
             createRelationshipReciprocal(
-                    Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_SONG,
-                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ARTIST);
+                    Label.ARTIST, Property.ARTIST_NAME, artist,
+                    Relation.HAS_SONG,
+                    Label.SONGNAME, Property.SONG_NAME, songName,
+                    Relation.HAS_ARTIST);
 
         // create relationship ALBUM/ARTIST
         if (!relationshipExists(
-                Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                Label.ARTIST, Prop.ARTIST_NAME, artist))
+                Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
+                Label.ARTIST, Property.ARTIST_NAME, artist))
             createRelationshipReciprocal(
-                    Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                    Label.ARTIST, Prop.ARTIST_NAME, artist, Relation.HAS_ALBUM);
+                    Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
+                    Label.ARTIST, Property.ARTIST_NAME, artist, Relation.HAS_ALBUM);
 
         // create relationship ALBUM/SONG
         if (!relationshipExists(
-                Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_SONG,
-                Label.SONGNAME, Prop.SONG_NAME, songName))
+                Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
+                Label.SONGNAME, Property.SONG_NAME, songName))
             createRelationshipReciprocal(
-                    Label.ALBUM, Prop.ALBUM_NAME, album, Relation.HAS_SONG,
-                    Label.SONGNAME, Prop.SONG_NAME, songName, Relation.HAS_ALBUM
+                    Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
+                    Label.SONGNAME, Property.SONG_NAME, songName, Relation.HAS_ALBUM
             );
     }
 
