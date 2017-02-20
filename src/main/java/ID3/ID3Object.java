@@ -49,15 +49,6 @@ public class ID3Object {
 		return album;
 	}
 
-	public String getGenre(){
-		String genre = null;
-		try{
-			genre = _tag.getFirst(FieldKey.GENRE);
-		}catch (KeyNotFoundException e)
-		{}
-		return genre;
-	}
-
 	public LinkedList<String> getAll(){
 		LinkedList<String> list = new LinkedList<>();
 		Iterator<TagField> iterator = _tag.getFields();

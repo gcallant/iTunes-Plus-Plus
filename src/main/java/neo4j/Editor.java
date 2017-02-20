@@ -2,7 +2,7 @@ package neo4j;
 
 import ID3.ID3Object;
 import Values.Label;
-import Values.Prop;
+import Values.Property;
 import org.neo4j.driver.v1.Session;
 
 import java.io.File;
@@ -66,22 +66,22 @@ public class Editor {
                 break;
             case Label.SONGNAME:
                 switch (req.prop) {
-                    case Prop.COMMENT:
+                    case Property.COMMENT:
                         id3.delComment();
                         break;
-                    case Prop.COMPOSER_NAME:
+                    case Property.COMPOSER_NAME:
                         id3.delComposer();
                         break;
-                    case Prop.DISC_NO:
+                    case Property.DISC_NO:
                         id3.delDiscNo();
                         break;
-                    case Prop.SONG_NAME:
+                    case Property.SONG_NAME:
                         id3.delTitle();
                         break;
-                    case Prop.TRACK_NUM:
+                    case Property.TRACK_NUM:
                         id3.delTrack();
                         break;
-                    case Prop.YEAR:
+                    case Property.YEAR:
                         id3.delYear();
                 }
         }
@@ -115,22 +115,22 @@ public class Editor {
                 break;
             case Label.SONGNAME:
                 switch (req.prop) {
-                    case Prop.COMMENT:
+                    case Property.COMMENT:
                         id3.setComment(req.value);
                         break;
-                    case Prop.COMPOSER_NAME:
+                    case Property.COMPOSER_NAME:
                         id3.setComposer(req.value);
                         break;
-                    case Prop.DISC_NO:
+                    case Property.DISC_NO:
                         id3.setDiscNo(req.value);
                         break;
-                    case Prop.SONG_NAME:
+                    case Property.SONG_NAME:
                         id3.setTitle(req.value);
                         break;
-                    case Prop.TRACK_NUM:
+                    case Property.TRACK_NUM:
                         id3.setTrack(req.value);
                         break;
-                    case Prop.YEAR:
+                    case Property.YEAR:
                         id3.setYear(req.value);
                 }
         }
