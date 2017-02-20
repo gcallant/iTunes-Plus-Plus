@@ -6,7 +6,7 @@ import Values.*;
 /**
  * Created by Ryan on 2/7/2017.
  *
- * Notes: When deleting songs, must check relationships and delete
+ * Notes: When deleting songs, this class checks relationships and deletes
  * empty artists, albums, and genres.
  */
 public class Deleter {
@@ -34,15 +34,9 @@ public class Deleter {
 
         delete(key, Label.SONGNAME);
 
-//        if(!hasRelations(album, Label.ALBUM)){
-//            delete(album, Label.ALBUM);
-//        }
-//        if(!hasRelations(artist, Label.ARTIST)){
-//            delete(artist, Label.ARTIST);
-//        }
-//        if(!hasRelations(genre, Label.GENRE)){
-//            delete(genre, Label.GENRE);
-//        }
+//        deleteOnEmpty(album, Label.ALBUM);
+//        deleteOnEmpty(artist, Label.ARTIST);
+//        deleteOnEmpty(genre, Label.GENRE);
     }
 
     public void deleteSongs(String...keys){
