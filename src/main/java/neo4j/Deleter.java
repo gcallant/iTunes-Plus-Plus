@@ -1,29 +1,91 @@
 package neo4j;
 
 import org.neo4j.driver.v1.*;
-import static org.neo4j.driver.v1.Values.parameters;
+import Values.*;
 
 /**
  * Created by Ryan on 2/7/2017.
+ *
+ * Notes: When deleting songs, must check relationships and delete
+ * empty artists, albums, and genres.
  */
 public class Deleter {
+//-----------------------------------------------------------------------------
+// PARAMS
+//-----------------------------------------------------------------------------
+    private Session _session;
+//    private QueryHandler _qHandler;
 
-    public static void main(String...args) {
-        Driver driver = GraphDatabase.driver("67.110.208.167:7474", AuthTokens.basic("ryan", "o#4uPUm-#BBx7G53Rt3$mj8FYa4!%_"));
-        Session session = driver.session();
+//-----------------------------------------------------------------------------
+// CONSTRUCTORS
+//-----------------------------------------------------------------------------
+    public Deleter(Session session){
+        _session = session;
+//        _qHandler = new QueryHandler(_session);
+    }
 
-        session.run("CREATE (a:Person {name: {name}, title: {title}})",
-                parameters("name", "Arthur", "title", "King"));
+//-----------------------------------------------------------------------------
+// PUBLIC METHODS
+//-----------------------------------------------------------------------------
+    public void deleteSong(String key){
+//        String album = _qHandler.findAlbum(key);
+//        String artist = _qHandler.findArtist(key);
+//        String genre = _qHandler.findGenre(key);
 
-        StatementResult result = session.run("MATCH (a:Person) WHERE a.name = {name} " +
-                        "RETURN a.name AS name, a.title AS title",
-                parameters("name", "Arthur"));
-        while (result.hasNext()) {
+        delete(key, Label.SONGNAME);
+
+//        if(!hasRelations(album, Label.ALBUM)){
+//            delete(album, Label.ALBUM);
+//        }
+//        if(!hasRelations(artist, Label.ARTIST)){
+//            delete(artist, Label.ARTIST);
+//        }
+//        if(!hasRelations(genre, Label.GENRE)){
+//            delete(genre, Label.GENRE);
+//        }
+    }
+
+    public void deleteSongs(String...keys){
+        for(String s : keys){
+            deleteSong(s);
+        }
+    }
+
+    //deletes node IF there are no relations to it
+    public void deleteOnEmpty(String key, String label){
+        if(!hasRelations(key, label)){
+            delete(key, label);
+        }
+    }
+
+//-----------------------------------------------------------------------------
+// PRIVATE METHODS
+//-----------------------------------------------------------------------------
+    private void delete(String key, String label){
+        StringBuilder query = new StringBuilder();
+
+        query.append("MATCH (" + key + ":" + label + ")");
+        query.append("DETACH DELETE " + key);
+
+        _session.run(query.toString());
+    }
+
+    private boolean hasRelations(String key, String label){
+        int relCnt = 0;
+        StringBuilder query = new StringBuilder();
+
+        query.append("MATCH (" + key + ":" + label + ")-[*]-() ");
+        query.append("RETURN COUNT(*)");
+
+        StatementResult result = _session.run(query.toString());
+
+        while(result.hasNext()){
             Record record = result.next();
-            System.out.println(record.get("title").asString() + " " + record.get("name").asString());
+            relCnt += record.get(0).asInt();
         }
 
-        session.close();
-        driver.close();
+        return (relCnt > 0);
     }
+
+
 }

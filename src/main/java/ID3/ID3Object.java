@@ -37,9 +37,9 @@ public class ID3Object {
 		_tag = _afile.getTag();
 	}
 
-	//-------------------------------------------------------------------------
-	//Gets
-	//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//Gets
+//-----------------------------------------------------------------------------
 	public String getAlbum(){
 		String album = null;
 		try{
@@ -47,15 +47,6 @@ public class ID3Object {
 		} catch(KeyNotFoundException e){}
 		
 		return album;
-	}
-
-	public String getGenre(){
-		String genre = null;
-		try{
-			genre = _tag.getFirst(FieldKey.GENRE);
-		}catch (KeyNotFoundException e)
-		{}
-		return genre;
 	}
 
 	public LinkedList<String> getAll(){
@@ -80,16 +71,7 @@ public class ID3Object {
 		
 		return artist;
 	}
-	
-//	public String getArtistSort(){
-//		String artistSort = null;
-//		try{
-//			artistSort = _tag.getFirst(FieldKey.ARTIST_SORT);
-//		} catch(KeyNotFoundException e){}
-//		
-//		return artistSort;
-//	}
-	
+
 	public String getComment(){
 		String comment = null;
 		try{
@@ -121,6 +103,15 @@ public class ID3Object {
 		return _afile.getFile().getAbsolutePath();
 	}
 
+	public String getGenre(){
+		String genre = null;
+		try{
+			genre = _tag.getFirst(FieldKey.GENRE);
+		} catch(KeyNotFoundException e){}
+
+		return genre;
+	}
+
 	public String getTitle(){
 		String title = null;
 		try{
@@ -147,11 +138,10 @@ public class ID3Object {
 		
 		return year;
 	}
-	
-	
-	//-------------------------------------------------------------------------
-	//Sets
-	//-------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//Sets
+//-----------------------------------------------------------------------------
 	public void setAlbum(String album){
 		try {
 			_tag.setField(FieldKey.ALBUM, album);
@@ -173,18 +163,7 @@ public class ID3Object {
 			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
 		}
 	}
-	
-//	public void setArtistSort(String artists){
-//		try {
-//			_tag.setField(FieldKey.ARTIST_SORT, artists);
-//			_afile.commit();
-//		} catch (KeyNotFoundException | FieldDataInvalidException e) {
-//			System.err.println("Invalid entry for 'ArtistSort': " + artists);
-//		} catch (CannotWriteException e) {
-//			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
-//		}
-//	}
-	
+
 	public void setComment(String comment){
 		try {
 			_tag.setField(FieldKey.COMMENT, comment);
@@ -217,7 +196,18 @@ public class ID3Object {
 			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
 		}
 	}
-	
+
+	public void setGenre(String genre){
+		try {
+		_tag.setField(FieldKey.GENRE, genre);
+		_afile.commit();
+		} catch (KeyNotFoundException | FieldDataInvalidException e) {
+			System.err.println("Invalid entry for 'Genre': " + genre);
+		} catch (CannotWriteException e) {
+			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
+		}
+	}
+
 	public void setTitle(String title){
 		try {
 			_tag.setField(FieldKey.TITLE, title);
@@ -251,10 +241,9 @@ public class ID3Object {
 		}
 	}
 	
-	//-------------------------------------------------------------------------
-	//Delete
-	//-------------------------------------------------------------------------
-
+//-----------------------------------------------------------------------------
+//Delete
+//-----------------------------------------------------------------------------
 	public void delAlbum(){
 		try {
 			_tag.deleteField(FieldKey.ALBUM);
@@ -276,17 +265,6 @@ public class ID3Object {
 			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
 		}
 	}
-
-//	public void delArtistSort(){
-//		try {
-//			_tag.deleteField(FieldKey.ARTIST_SORT);
-//			_afile.commit();
-//		} catch (KeyNotFoundException e) {
-//			System.err.println("Cannot remove 'ArtistSort'");
-//		} catch (CannotWriteException e) {
-//			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
-//		}
-//	}
 	
 	public void delComment(){
 		try {
@@ -320,7 +298,18 @@ public class ID3Object {
 			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
 		}
 	}
-	
+
+	public void delGenre(){
+		try {
+			_tag.deleteField(FieldKey.GENRE);
+			_afile.commit();
+		} catch (KeyNotFoundException e) {
+			System.err.println("Cannot remove 'Genre'");
+		} catch (CannotWriteException e) {
+			System.err.println("Unable to update audiofile: " + _afile.getFile().getName());
+		}
+	}
+
 	public void delTitle(){
 		try {
 			_tag.deleteField(FieldKey.TITLE);
