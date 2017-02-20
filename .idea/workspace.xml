@@ -1,31 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6ed4d913-b860-4516-b59b-7ad1089fe6b5" name="Default" comment="Updated ValueTester&#10;">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/ID3/ID3Object.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/ID3/Tester.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Music/Blind Melon - No Rain.mp3" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Values/Label.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Values/Prop.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/Values/Relation.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/back-blue.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/forward-blue.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/import-pink.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/itunes++.fxml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/pause-yellow.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/play-black.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/play-green.png" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/stop-red.png" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/ID3/Tester.java" afterPath="$PROJECT_DIR$/src/test/java/ID3/ID3Tester.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+    <list default="true" id="6ed4d913-b860-4516-b59b-7ad1089fe6b5" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/neo4j/EditRequest.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/neo4j/Editor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/ID3/ID3Object.java" afterPath="$PROJECT_DIR$/src/main/java/ID3/ID3Object.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Values/Label.java" afterPath="$PROJECT_DIR$/src/main/java/Values/Label.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Values/Prop.java" afterPath="$PROJECT_DIR$/src/main/java/Values/Prop.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Values/Relation.java" afterPath="$PROJECT_DIR$/src/main/java/Values/Relation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/neo4j/Deleter.java" afterPath="$PROJECT_DIR$/src/main/java/neo4j/Deleter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/Values/ValueTester.java" afterPath="$PROJECT_DIR$/src/test/java/Values/ValueTester.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="C:/Libraries/target/" />
@@ -89,8 +68,8 @@
       <file leaf-file-name="Editor.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/neo4j/Editor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="142">
-              <caret line="45" column="50" lean-forward="true" selection-start-line="45" selection-start-column="50" selection-end-line="45" selection-end-column="50" />
+            <state relative-caret-position="57">
+              <caret line="40" column="9" lean-forward="true" selection-start-line="40" selection-start-column="9" selection-end-line="40" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#825#826#0" expanded="true" />
@@ -308,6 +287,32 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="iTunes-Plus-Plus" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="iTunes-Plus-Plus" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="neo4j" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -665,12 +670,19 @@
       <option name="project" value="LOCAL" />
       <updated>1486777450718</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added Editor, EditRequest, and Deleter classes. Also edited Label and ID3Object classes to include Genre. Also removed year, comment, and composer from Label class.&#10;">
+      <created>1487566855281</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1487566855281</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -693,7 +705,7 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33506945" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Graph Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3370607" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19213313" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19213313" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Graph Database Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42735043" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
@@ -712,7 +724,8 @@
     <MESSAGE value="Still having troubles with my neo4j api.. Thought if I commit this Deleter class, maybe it will see the api." />
     <MESSAGE value="Nm, fixed it..." />
     <MESSAGE value="Updated ValueTester&#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated ValueTester&#10;" />
+    <MESSAGE value="Added Editor, EditRequest, and Deleter classes. Also edited Label and ID3Object classes to include Genre. Also removed year, comment, and composer from Label class.&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Editor, EditRequest, and Deleter classes. Also edited Label and ID3Object classes to include Genre. Also removed year, comment, and composer from Label class.&#10;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -1096,8 +1109,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/neo4j/Editor.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="45" column="50" lean-forward="true" selection-start-line="45" selection-start-column="50" selection-end-line="45" selection-end-column="50" />
+        <state relative-caret-position="57">
+          <caret line="40" column="9" lean-forward="true" selection-start-line="40" selection-start-column="9" selection-end-line="40" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#825#826#0" expanded="true" />
