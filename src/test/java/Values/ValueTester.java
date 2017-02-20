@@ -7,6 +7,7 @@ package Values;
 import ID3.ID3Object;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ServiceUnavailableException;
+import org.neo4j.test.GraphDescription;
 import scala.collection.mutable.StringBuilder;
 
 import java.io.File;
@@ -44,8 +45,9 @@ public class ValueTester {
             System.exit(-1);
         }
 
-        String song = id3.getTitle();
-        String file = id3.getFile();
+        String key = id3.getTitle().replace(" ", "");
+        String song = "`" + id3.getTitle() + "`";
+        String file = "`" + id3.getFile().replace("\\","\\\\") + "`";
         String discNo = id3.getDiscNo();
         String track = id3.getTrack();
 
@@ -55,9 +57,9 @@ public class ValueTester {
 //        importComposer();
 //        importYear();
 
-        importSong(song, file, discNo, track);
+        importSong(key, song, file, discNo, track);
 
-        querySong(song);
+        querySong(key, song);
 
         _session.close();
         _driver.close();
@@ -66,7 +68,9 @@ public class ValueTester {
     private static void init(){
         System.out.println("Accessing database...");
         try{
-            _driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("ryan", "o#4uPUm-#BBx7G53Rt3$mj8FYa4!%_"));
+//            _graphDB = new GraphDatabase();
+            _driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("ryan", "ryan"));
+
             _session = _driver.session();
         } catch(ServiceUnavailableException e) {
             System.err.println(e.getLocalizedMessage());
@@ -75,47 +79,52 @@ public class ValueTester {
         System.out.println("Neo4j database active");
     }
 
-    private static void importSong(String song, String file, String discNo, String track){
+    private static void importSong(String key, String song, String file, String discNo, String track){
         StringBuilder importQuery = new StringBuilder();
 
-        importQuery.append("CREATE (" + song + "):" + Label.SONGNAME
-                + " {" + Prop.SONG_NAME + ": " + song + ", " + Prop.FILENAME+ ": "
-                + file);
+        importQuery.append("CREATE (" + key + ":" + Label.SONGNAME
+                + " {" + Prop.FILENAME + ": {" + song + "}, " + Prop.FILENAME+ ": {"
+                + file + "}");
 
         if((discNo != null) && (track != null)){
-            importQuery.append(", " + Prop.DISC_NO + ": " + discNo);
-            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
+            importQuery.append(", " + Prop.DISC_NO + ": {" + discNo + "}");
+            importQuery.append(", " + Prop.TRACK_NUM + ": {" + track + "}})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK_NUM, track));
+                    parameters(Prop.FILENAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK_NUM, track));
         }
         else if(discNo != null){
-            importQuery.append(", " + Prop.DISC_NO + ": " + discNo + "})");
+            importQuery.append(", " + Prop.DISC_NO + ": {" + discNo + "}})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo));
+                    parameters(Prop.FILENAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo));
         }
         else if(track != null){
-            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
+            importQuery.append(", " + Prop.TRACK_NUM + ": {" + track + "}})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.TRACK_NUM, track));
+                    parameters(Prop.FILENAME, song, Prop.FILENAME, file, Prop.TRACK_NUM, track));
         }
         else {
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file));
+                    parameters(Prop.FILENAME, song, Prop.FILENAME, file));
         }
+        System.out.println(importQuery.toString());
     }
 
-    private static void querySong(String song){
+    private static void querySong(String key, String song){
         StringBuilder query = new StringBuilder();
 
-        query.append("MATCH (" + song + ":" + Label.SONGNAME + ")");
-        query.append(" WHERE " + song + "." + Prop.SONG_NAME + " = {" + song + "}");
-        query.append(" RETURN " + song + "." + Prop.FILENAME);
+//        query.append("MATCH (" + song + ")");
+        query.append("MATCH (" + key + ":" + Label.SONGNAME + ")");
+        query.append(" WHERE (" + song + ")." + Prop.FILENAME + " = {" + song + "}");
+        query.append(" RETURN (" + song + ")." + Prop.FILENAME + " AS " + Prop.FILENAME);
+
+        System.out.println(query.toString());
 
         StatementResult result = _session.run(query.toString(),
-                parameters(Prop.SONG_NAME, song));
+                parameters(Prop.FILENAME, song));
+
         while (result.hasNext()) {
             Record record = result.next();
-            System.out.println(record.get(Prop.FILENAME).asString() + " " + record.get(song).asString());
+            System.out.println(record.get(Prop.FILENAME).asString());
         }
     }
 }
