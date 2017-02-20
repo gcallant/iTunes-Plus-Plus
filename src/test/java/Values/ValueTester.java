@@ -79,28 +79,28 @@ public class ValueTester {
         StringBuilder importQuery = new StringBuilder();
 
         importQuery.append("CREATE (" + song + "):" + Label.SONGNAME
-                + " {" + Prop.SONG_NAME + ": " + song + ", " + Prop.FILENAME+ ": "
+                + " {" + Property.SONG_NAME + ": " + song + ", " + Property.FILENAME+ ": "
                 + file);
 
         if((discNo != null) && (track != null)){
-            importQuery.append(", " + Prop.DISC_NO + ": " + discNo);
-            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
+            importQuery.append(", " + Property.DISC_NO + ": " + discNo);
+            importQuery.append(", " + Property.TRACK_NUM + ": " + track + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo, Prop.TRACK_NUM, track));
+                    parameters(Property.SONG_NAME, song, Property.FILENAME, file, Property.DISC_NO, discNo, Property.TRACK_NUM, track));
         }
         else if(discNo != null){
-            importQuery.append(", " + Prop.DISC_NO + ": " + discNo + "})");
+            importQuery.append(", " + Property.DISC_NO + ": " + discNo + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.DISC_NO, discNo));
+                    parameters(Property.SONG_NAME, song, Property.FILENAME, file, Property.DISC_NO, discNo));
         }
         else if(track != null){
-            importQuery.append(", " + Prop.TRACK_NUM + ": " + track + "})");
+            importQuery.append(", " + Property.TRACK_NUM + ": " + track + "})");
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file, Prop.TRACK_NUM, track));
+                    parameters(Property.SONG_NAME, song, Property.FILENAME, file, Property.TRACK_NUM, track));
         }
         else {
             _session.run(importQuery.toString(),
-                    parameters(Prop.SONG_NAME, song, Prop.FILENAME, file));
+                    parameters(Property.SONG_NAME, song, Property.FILENAME, file));
         }
     }
 
@@ -108,14 +108,14 @@ public class ValueTester {
         StringBuilder query = new StringBuilder();
 
         query.append("MATCH (" + song + ":" + Label.SONGNAME + ")");
-        query.append(" WHERE " + song + "." + Prop.SONG_NAME + " = {" + song + "}");
-        query.append(" RETURN " + song + "." + Prop.FILENAME);
+        query.append(" WHERE " + song + "." + Property.SONG_NAME + " = {" + song + "}");
+        query.append(" RETURN " + song + "." + Property.FILENAME);
 
         StatementResult result = _session.run(query.toString(),
-                parameters(Prop.SONG_NAME, song));
+                parameters(Property.SONG_NAME, song));
         while (result.hasNext()) {
             Record record = result.next();
-            System.out.println(record.get(Prop.FILENAME).asString() + " " + record.get(song).asString());
+            System.out.println(record.get(Property.FILENAME).asString() + " " + record.get(song).asString());
         }
     }
 }

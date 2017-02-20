@@ -10,5 +10,6 @@ public class Relation {
     public final static String HAS_COMPOSER = "hasComposer";
     public final static String HAS_SONG = "hasSong";
     public final static String HAS_YEAR = "hasYear";
+    public final static String HAS_GENRE = "hasGenre";
 }
  

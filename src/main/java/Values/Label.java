@@ -10,4 +10,5 @@ public class Label {
     public final static String COMPOSER = "composer";
     public final static String SONGNAME = "song";
     public final static String YEAR = "year";
+    public final static String GENRE = "genre";
 }
