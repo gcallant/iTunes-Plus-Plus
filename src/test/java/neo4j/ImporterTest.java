@@ -4,7 +4,6 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
@@ -18,7 +17,7 @@ public class ImporterTest {
 
     @Before
     public void setUp() throws Exception{
-        _NEOCONNECTION = DatabaseManager.getInstance(DatabaseManager._URL, DatabaseManager._PORT, "neo4j", "kaboom");
+        _NEOCONNECTION = DatabaseManager.getInstance(DatabaseManager._URL, DatabaseManager._PORT, "iTunes", "iTunes");
         _NEOCONNECTION.getDatabaseConnector().run("MATCH (n) DETACH DELETE n");
     }
 
@@ -33,7 +32,7 @@ public class ImporterTest {
         songFiles.add(".mpeg");
 
         AudioFileIO.logger.setLevel(Level.OFF);
-        importer.addFolderRecursively("C:\\Users\\Josh\\Music", songFiles);
+        importer.addFolderRecursively("E:\\Aaron Goldberg", songFiles);
     }
 
 }
