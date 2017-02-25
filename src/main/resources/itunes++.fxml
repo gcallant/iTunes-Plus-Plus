@@ -1,46 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="guiInterface.Controller">
+<?import javafx.stage.Screen?>
+
+<?import java.lang.Double?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="guiInterface.Controller">
+    <fx:define>
+        <Screen fx:factory="getPrimary" fx:id="screen" />
+        <!--<Double fx:id="xHeight" fx:value="${screen.visualBounds.height}" />-->
+    </fx:define>
     <children>
-        <HBox alignment="CENTER" layoutX="286.0" layoutY="29.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="150.0" prefWidth="452.0">
+        <MenuBar fx:id="menuBar">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem id="menu_item_import" fx:id="itemImport" onAction="#handleMenuItemImport" mnemonicParsing="false" text="Import" />
+                        <MenuItem id="menu_item_close" fx:id="itemClose" onAction="#handleMenuItemClose" mnemonicParsing="false" text="Close" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <MenuItem id="menu_item_edit" fx:id="itemEdit" onAction="#handleMenuItemEdit" mnemonicParsing="false" text="Edit Song" />
+                        <MenuItem id="menu_item_delete" fx:id="itemDelete" onAction="#handleMenuItemDelete" mnemonicParsing="false" text="Delete" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem id="menu_item_about" fx:id="itemAbout" onAction="#handleMenuItemAbout" mnemonicParsing="false" text="About" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <HBox alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="150" prefWidth="${screen.visualBounds.width}">
             <children>
-                <ImageView id="buttonPreviousSong" accessibleText="Previous Song" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handlePreviousSongButtonAction" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_prev" fx:id="btnPrev" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handleBtnPrev" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@back-blue.png" />
                     </image>
                 </ImageView>
-                <ImageView id="buttonPlay" accessibleRole="BUTTON" accessibleText="Play" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handlePlayButtonAction" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_play" fx:id="btnPlay" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handleBtnPlay" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@play-green.png" />
                     </image>
                 </ImageView>
-                <ImageView id="buttonNextSong" accessibleText="Next Song" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handleNextSongButtonAction" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_pause" fx:id="btnPause" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handleBtnPause" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@pause-yellow.png" />
+                    </image>
+                </ImageView>
+                <ImageView id="btn_stop" fx:id="btnStop" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handleBtnStop" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@stop-red.png" />
+                    </image>
+                </ImageView>
+                <ImageView id="btn_next" fx:id="btnNext" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#handleBtnNext" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@forward-blue.png" />
                     </image>
                 </ImageView>
             </children>
+            <VBox.margin>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </VBox.margin>
         </HBox>
-        <TextField id="searchBar" accessibleText="Enter a search query" alignment="CENTER" layoutX="2.0" layoutY="214.0" prefHeight="25.0" prefWidth="1024.0" promptText="Enter song name, artist name or genre to search">
+        <TextField id="searchBar" fx:id="searchBar" alignment="CENTER" prefHeight="39.0" prefWidth="598.0" promptText="Enter song name, artist name or genre to search">
             <font>
                 <Font size="18.0" />
             </font>
+            <VBox.margin>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </VBox.margin>
         </TextField>
-        <ImageView id="buttonImport" accessibleText="Import music into library" fitHeight="50.0" fitWidth="50.0" layoutX="29.0" layoutY="598.0" onMouseClicked="#handleImportButtonAction" pickOnBounds="true" preserveRatio="true">
-            <image>
-                <Image url="@import-pink.png" />
-            </image>
-        </ImageView>
-        <Canvas accessibleText="Results" height="600.0" layoutX="79.0" layoutY="298.0" width="800.0" />
-      <ScrollPane layoutX="122.0" layoutY="275.0" prefHeight="409.0" prefWidth="743.0" />
+        <ScrollPane id="scroll_list_items" fitToHeight="true" fitToWidth="true" prefHeight="450.0" prefWidth="600.0">
+            <VBox.margin>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </VBox.margin>
+            <content>
+                <TableView id="table_view_item_list" fx:id="tViewSongList" prefHeight="200.0" prefWidth="200.0">
+                    <columns>
+                        <TableColumn prefWidth="502.0" text="Name" />
+                        <TableColumn prefWidth="502.0" text="Label" />
+                    </columns>
+                </TableView>
+            </content>
+        </ScrollPane>
     </children>
-</Pane>
+</VBox>

@@ -1,20 +1,51 @@
 package guiInterface;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.stage.Stage;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class Controller
 {
+   private ArrayList<String> _list;
+   private MediaPlayer _mPlayer;
+   private MediaView _mView;
+
    @FXML
-   private ImageView previousSongButton;
+   private ImageView btnNext;
    @FXML
-   private ImageView playButton;
+   private ImageView btnPause;
    @FXML
-   private ImageView nextSongButton;
+   private ImageView btnPlay;
    @FXML
-   private ImageView importButon;
+   private ImageView btnPrev;
+   @FXML
+   private ImageView btnStop;
+   @FXML
+   private MenuBar menuBar;
+    @FXML
+    private MenuItem itemAbout;
+    @FXML
+    private MenuItem itemClose;
+    @FXML
+    private MenuItem itemDelete;
+    @FXML
+    private MenuItem itemEdit;
+    @FXML
+    private MenuItem itemImport;
+   @FXML
+   private TableView tViewSongList;
+   @FXML
+   private TextField searchBar;
 
    @FXML
    public static void showAlert(String header, String message, Alert.AlertType alertType)
@@ -25,31 +56,90 @@ public class Controller
       alert.show();
    }
 
-   @FXML protected void handlePlayButtonAction(MouseEvent event)
+   @FXML protected void handleBtnPlay(MouseEvent event)
    {
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setHeaderText("Play was clicked");
       alert.show();
    }
 
-   @FXML protected void handleNextSongButtonAction(MouseEvent event)
+   @FXML protected void handleBtnNext(MouseEvent event)
    {
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setHeaderText("Next song was clicked");
       alert.show();
    }
 
-   @FXML protected void handleImportButtonAction(MouseEvent event)
+   @FXML protected void handleBtnPause(MouseEvent event)
    {
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setHeaderText("Import was clicked");
+      alert.setHeaderText("Pause was clicked");
       alert.show();
    }
 
-   @FXML protected void handlePreviousSongButtonAction(MouseEvent event)
+   @FXML protected void handleBtnStop(MouseEvent event)
+   {
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setHeaderText("Stop was clicked");
+      alert.show();
+   }
+
+   @FXML protected void handleBtnPrev(MouseEvent event)
    {
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
       alert.setHeaderText("Previous song was clicked");
       alert.show();
+   }
+
+//    @FXML protected void handleMenuBar(MouseEvent event)
+//    {
+//        System.out.println("Manage Accbtnclick");
+//        Stage stage = (Stage) menuBar.getScene().getWindow();
+//        Scene scene = Main.screens.get("tweet");
+//        stage.setScene(scene);
+//        stage.show();
+//    }
+
+    @FXML protected void handleMenuItemAbout(ActionEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Project for Modern Database Systems\n"
+        + "written by Ryan Babcock, Grant Callant, and Josh Cotes\n\n"
+        + "Based on iTunes application, however this media player uses a Neo4j database.");
+        alert.show();
+    }
+
+    @FXML protected void handleMenuItemClose(ActionEvent event)
+    {
+        Stage stage = (Stage) menuBar.getScene().getWindow();
+        stage.close();
+    }
+
+    @FXML protected void handleMenuItemImport(ActionEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Import");
+        alert.show();
+    }
+
+    @FXML protected void handleMenuItemDelete(ActionEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Delete");
+        alert.show();
+    }
+
+    @FXML protected void handleMenuItemEdit(ActionEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Edit");
+        alert.show();
+    }
+
+   private void setMediaPlayer(String path){
+      Media media = new Media(new File(path).toURI().toString());
+      _mPlayer = new MediaPlayer(media);
+      _mPlayer.setAutoPlay(true);
+      _mView = new MediaView(_mPlayer);
    }
 }
