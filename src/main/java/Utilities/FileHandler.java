@@ -1,11 +1,8 @@
 package Utilities;
 
-import ID3.ID3Object;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Handles file io and ID3 tag retrieval
