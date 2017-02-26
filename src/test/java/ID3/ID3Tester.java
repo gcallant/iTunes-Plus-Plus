@@ -1,5 +1,7 @@
 package ID3;
 
+import Utilities.ID3Object;
+
 import java.io.File;
 import java.io.IOException;
 

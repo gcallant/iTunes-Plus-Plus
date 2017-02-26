@@ -1,6 +1,6 @@
 package neo4j;
 
-import ID3.ID3Object;
+import Utilities.ID3Object;
 import Utilities.FileHandler;
 import Values.Label;
 import Values.Property;

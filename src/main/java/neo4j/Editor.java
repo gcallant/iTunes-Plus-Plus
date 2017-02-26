@@ -1,6 +1,6 @@
 package neo4j;
 
-import ID3.ID3Object;
+import Utilities.ID3Object;
 import Values.Label;
 import Values.Property;
 import org.neo4j.driver.v1.Session;
