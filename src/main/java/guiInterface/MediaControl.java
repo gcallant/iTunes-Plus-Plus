@@ -31,7 +31,6 @@ public class MediaControl extends BorderPane {
     private Slider timeSlider;
     private Label playTime;
     private Pane mvPane;
-    private Runnable playRunnable;
 
     public MediaControl(){
         Runtime.getRuntime().addShutdownHook(new MediaControlShutdownHook(this));
@@ -107,8 +106,8 @@ public class MediaControl extends BorderPane {
         if(mp == null) return false;
         String path1 = new File(path).getAbsolutePath().replace("file:", "").replace("\\", "/").replace(" ", "%20");
         String path2 = mp.getMedia().getSource().replace("file:/", "").replace("\\", "/").replace(" ", "%20");
-        System.out.println("path: " + path1);
-        System.out.println("mp: " + path2);
+//        System.out.println("path: " + path1);
+//        System.out.println("mp: " + path2);
         return path1.equals(path2);
     }
 
@@ -129,19 +128,7 @@ public class MediaControl extends BorderPane {
                 updateValues();
             }
         });
-// Set play behavior
-        mp.setOnPlaying(playRunnable = new Runnable() {
-            public void run() {
-                System.out.println("onPlay");
-            }
-        });
-// Set on paused
-        mp.setOnPaused(new Runnable() {
-            public void run() {
-                System.out.println("onPause");
-            }
-        });
-// Set on ready
+        // Set on ready
         mp.setOnReady(new Runnable() {
             public void run() {
                 duration = mp.getMedia().getDuration();
@@ -149,13 +136,13 @@ public class MediaControl extends BorderPane {
             }
         });
         mp.setCycleCount(1);// Song doesn't repeat
-// Set on End
+        // Set on End
         mp.setOnEndOfMedia(new Runnable() {
             public void run() {
                 atEndOfMedia = true;
             }
         });
-// Set time slider
+        // Set time slider
         timeSlider.valueProperty().addListener(new InvalidationListener() {
             public void invalidated(Observable ov) {
                 if (timeSlider.isValueChanging()) {

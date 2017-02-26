@@ -22,6 +22,7 @@ import static org.neo4j.driver.v1.Values.parameters;
  */
 public class Importer {
 
+    private int _songCnt = 0;
     private Session _session;
 
     public Importer(Session session) {
@@ -69,7 +70,10 @@ public class Importer {
         int i = 0;
         for (String songPath : songPaths)
             addSong(songPath, id3s.get(i++));
+        _songCnt += i;
     }
+
+    public int getSongCount() { return _songCnt; }
 
     /**
      * Sanitizes strings for database entry.

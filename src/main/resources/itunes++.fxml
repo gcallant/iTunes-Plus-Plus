@@ -21,46 +21,46 @@
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem id="menu_item_import" fx:id="itemImport" onAction="#handleMenuItemImport" mnemonicParsing="false" text="Import" />
-                        <MenuItem id="menu_item_close" fx:id="itemClose" onAction="#handleMenuItemClose" mnemonicParsing="false" text="Close" />
+                        <MenuItem id="menu_item_import" onAction="#handleMenuItemImport" mnemonicParsing="false" text="Import" />
+                        <MenuItem id="menu_item_close" onAction="#handleMenuItemClose" mnemonicParsing="false" text="Close" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem id="menu_item_edit" fx:id="itemEdit" onAction="#handleMenuItemEdit" mnemonicParsing="false" text="Edit Song" />
-                        <MenuItem id="menu_item_delete" fx:id="itemDelete" onAction="#handleMenuItemDelete" mnemonicParsing="false" text="Delete" />
+                        <MenuItem id="menu_item_edit" onAction="#handleMenuItemEdit" mnemonicParsing="false" text="Edit Song" />
+                        <MenuItem id="menu_item_delete" onAction="#handleMenuItemDelete" mnemonicParsing="false" text="Delete" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem id="menu_item_about" fx:id="itemAbout" onAction="#handleMenuItemAbout" mnemonicParsing="false" text="About" />
+                        <MenuItem id="menu_item_about" onAction="#handleMenuItemAbout" mnemonicParsing="false" text="About" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
         <HBox id="hbox_buttons" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100" prefWidth="${screen.visualBounds.width}">
             <children>
-                <ImageView id="btn_prev" fx:id="btnPrev" fitHeight="100" fitWidth="200.0" onMouseClicked="#handleBtnPrev" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_prev" fitHeight="100" fitWidth="200.0" onMouseClicked="#handleBtnPrev" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@back-blue.png" />
                     </image>
                 </ImageView>
-                <ImageView id="btn_play" fx:id="btnPlay" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnPlay" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_play" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnPlay" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@play-green.png" />
                     </image>
                 </ImageView>
-                <ImageView id="btn_pause" fx:id="btnPause" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnPause" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_pause" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnPause" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@pause-yellow.png" />
                     </image>
                 </ImageView>
-                <ImageView id="btn_stop" fx:id="btnStop" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnStop" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_stop" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnStop" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@stop-red.png" />
                     </image>
                 </ImageView>
-                <ImageView id="btn_next" fx:id="btnNext" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnNext" pickOnBounds="true" preserveRatio="true">
+                <ImageView id="btn_next" fitHeight="100.0" fitWidth="200.0" onMouseClicked="#handleBtnNext" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@forward-blue.png" />
                     </image>
