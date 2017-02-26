@@ -1,9 +1,10 @@
 package guiInterface;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -11,6 +12,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -22,22 +24,24 @@ import java.util.ArrayList;
 
 public class Controller
 {
-   private ArrayList<String> _list;
-   private MediaPlayer _mPlayer;
-   private MediaView _mView;
-
-   @FXML
-   private ImageView btnNext;
-   @FXML
-   private ImageView btnPause;
-   @FXML
-   private ImageView btnPlay;
-   @FXML
-   private ImageView btnPrev;
-   @FXML
-   private ImageView btnStop;
-   @FXML
-   private MenuBar menuBar;
+    private String testString = "src\\main\\resources\\Music\\Blind Melon - No Rain.mp3";
+    private int currentSong;
+    private ArrayList<String> _songPaths;
+    private ArrayList<String> _searchList;
+    @FXML
+    private MediaControl mediaControl;
+    @FXML
+    private ImageView btnNext;
+    @FXML
+    private ImageView btnPause;
+    @FXML
+    private ImageView btnPlay;
+    @FXML
+    private ImageView btnPrev;
+    @FXML
+    private ImageView btnStop;
+    @FXML
+    private MenuBar menuBar;
     @FXML
     private MenuItem itemAbout;
     @FXML
@@ -48,70 +52,58 @@ public class Controller
     private MenuItem itemEdit;
     @FXML
     private MenuItem itemImport;
-   @FXML
-   private TableView tViewSongList;
-   @FXML
-   private TextField searchBar;
+    @FXML
+    private TableView tViewSongList;
+    @FXML
+    private TextField searchBar;
 
-   @FXML
-   public static void showAlert(String header, String message, Alert.AlertType alertType)
-   {
-      Alert alert = new Alert(alertType);
-      alert.setHeaderText(header);
-      alert.setContentText(message);
-      alert.show();
-   }
+    @FXML
+    public static void showAlert(String header, String message, Alert.AlertType alertType)
+    {
+        Alert alert = new Alert(alertType);
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        alert.show();
+    }
 
-   @FXML protected void handleBtnPlay(MouseEvent event)
-   {
-      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setHeaderText("Play was clicked");
-      alert.show();
-   }
+    @FXML protected void handleBtnPlay(MouseEvent event)
+    {
+        if(!mediaControl.isLoaded(testString)){
+            initMediaPlayer(testString);
+        }
+        mediaControl.play();
+    }
 
-   @FXML protected void handleBtnNext(MouseEvent event)
-   {
-      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setHeaderText("Next song was clicked");
-      alert.show();
-   }
+    @FXML protected void handleBtnNext(MouseEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Next song was clicked");
+        alert.show();
+    }
 
-   @FXML protected void handleBtnPause(MouseEvent event)
-   {
-      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setHeaderText("Pause was clicked");
-      alert.show();
-   }
+    @FXML protected void handleBtnPause(MouseEvent event)
+    {
+        mediaControl.pause();
+    }
 
-   @FXML protected void handleBtnStop(MouseEvent event)
-   {
-      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setHeaderText("Stop was clicked");
-      alert.show();
-   }
+    @FXML protected void handleBtnStop(MouseEvent event)
+    {
+        mediaControl.stop();
+    }
 
-   @FXML protected void handleBtnPrev(MouseEvent event)
-   {
-      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      alert.setHeaderText("Previous song was clicked");
-      alert.show();
-   }
-
-//    @FXML protected void handleMenuBar(MouseEvent event)
-//    {
-//        System.out.println("Manage Accbtnclick");
-//        Stage stage = (Stage) menuBar.getScene().getWindow();
-//        Scene scene = Main.screens.get("tweet");
-//        stage.setScene(scene);
-//        stage.show();
-//    }
+    @FXML protected void handleBtnPrev(MouseEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Previous song was clicked");
+        alert.show();
+    }
 
     @FXML protected void handleMenuItemAbout(ActionEvent event)
     {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText("Project for Modern Database Systems\n"
-        + "written by Ryan Babcock, Grant Callant, and Josh Cotes\n\n"
-        + "Based on iTunes application, however this media player uses a Neo4j database.");
+                + "written by Ryan Babcock, Grant Callant, and Josh Cotes\n\n"
+                + "Based on iTunes application, however this media player uses a Neo4j database.");
         alert.show();
     }
 
@@ -152,10 +144,11 @@ public class Controller
         }
     }
 
-   private void setMediaPlayer(String path){
-      Media media = new Media(new File(path).toURI().toString());
-      _mPlayer = new MediaPlayer(media);
-      _mPlayer.setAutoPlay(true);
-      _mView = new MediaView(_mPlayer);
-   }
+    private void initMediaPlayer(String path){
+        Media media = new Media(new File(path).toURI().toString());
+        MediaPlayer mp = new MediaPlayer(media);
+        mp.setAutoPlay(true);
+        mediaControl.setMediaPlayer(mp);
+    }
+
 }
