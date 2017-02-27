@@ -27,6 +27,11 @@ public class Deleter {
 //-----------------------------------------------------------------------------
 // PUBLIC METHODS
 //-----------------------------------------------------------------------------
+    public void cleanDatabase(){
+        String clearAll = "MATCH (n) DETACH DELETE n";
+        _session.run(clearAll);
+    }
+
     public void deleteSong(String key){
 //        String album = _qHandler.findAlbum(key);
 //        String artist = _qHandler.findArtist(key);
@@ -50,6 +55,13 @@ public class Deleter {
         if(!hasRelations(key, label)){
             delete(key, label);
         }
+    }
+
+    public void deleteRelationship(String key1, String label1, String key2, String label2){
+        StringBuilder query = new StringBuilder();
+        query.append("MATCH (").append(key1).append(":").append(label1).append(")");
+        query.append("-[r:*]-(").append(key2).append(":").append(label2).append(")");
+        query.append("DELETE r");
     }
 
 //-----------------------------------------------------------------------------

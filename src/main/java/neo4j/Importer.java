@@ -5,6 +5,7 @@ import Utilities.FileHandler;
 import Values.Label;
 import Values.Property;
 import Values.Relation;
+import org.jaudiotagger.audio.AudioFileIO;
 import org.neo4j.driver.v1.Session;
 
 import java.io.File;
@@ -73,7 +74,11 @@ public class Importer {
         _songCnt += i;
     }
 
-    public int getSongCount() { return _songCnt; }
+    public int getSongCount() {
+        int tmp = _songCnt;
+        _songCnt = 0;
+        return tmp;
+    }
 
     /**
      * Sanitizes strings for database entry.

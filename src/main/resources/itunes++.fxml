@@ -22,6 +22,7 @@
                 <Menu mnemonicParsing="false" text="File">
                     <items>
                         <MenuItem id="menu_item_import" onAction="#handleMenuItemImport" mnemonicParsing="false" text="Import" />
+                        <MenuItem id="menu_item_clearAll" onAction="#handleMenuItemClearAll" mnemonicParsing="false" text="Clear All" />
                         <MenuItem id="menu_item_close" onAction="#handleMenuItemClose" mnemonicParsing="false" text="Close" />
                     </items>
                 </Menu>

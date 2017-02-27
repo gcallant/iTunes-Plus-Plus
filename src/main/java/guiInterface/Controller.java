@@ -1,29 +1,29 @@
 package guiInterface;
 
+import Utilities.ID3Object;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
 
 import neo4j.DatabaseManager;
 import neo4j.Deleter;
 import neo4j.Editor;
 import neo4j.Importer;
-import org.jaudiotagger.audio.AudioFileIO;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
+import java.util.Arrays;
+import java.util.Optional;
 
 public class Controller
 {
@@ -32,6 +32,7 @@ public class Controller
     private Editor editor = new Editor(dbm.getDatabaseConnector());
     private Deleter deleter = new Deleter(dbm.getDatabaseConnector());
 
+    private final String[] SUPPORTED_EXT = {".mp3",".mp4",".wmv",".mpeg"};
     private final String ROOT_MUSIC_DIR = "src\\main\\resources\\Music";
     private String testString = "src\\main\\resources\\Music\\Blind Melon - No Rain.mp3";
     private ArrayList<String> _searchList;
@@ -100,23 +101,41 @@ public class Controller
         stage.close();
     }
 
+    @FXML protected void handleMenuItemClearAll(ActionEvent event)
+    {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Clear All");
+        alert.setHeaderText("Clear all contents from database?");
+        alert.setContentText("Are you sure you want to clear all contents from database?\n"
+        + "*Note: Your songs will not be deleted.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get() == ButtonType.OK){
+            deleter.cleanDatabase();
+        }
+    }
+
     @FXML protected void handleMenuItemImport(ActionEvent event)
     {
-        ArrayList<String> songFiles = new ArrayList<>();
-        songFiles.add(".mp3");
-        songFiles.add(".mp4");
-        songFiles.add(".wmv");
-        songFiles.add(".mpeg");
+        int songCnt;
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Open Music Directory");
+        File rootDir = dirChooser.showDialog(menuBar.getContextMenu());
 
-        AudioFileIO.logger.setLevel(Level.OFF);
-        importer.addFolderRecursively(ROOT_MUSIC_DIR, songFiles);
-
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        if(importer.getSongCount() == 1){
-            alert.setHeaderText(importer.getSongCount() + " song imported!");
-        } else {
-            alert.setHeaderText(importer.getSongCount() + " songs imported!");
+        if(rootDir == null){
+            return;
         }
+
+        importer.addFolderRecursively(rootDir.getAbsolutePath(), new ArrayList<>(Arrays.asList(SUPPORTED_EXT)));
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        if((songCnt = importer.getSongCount()) == 1){
+            alert.setHeaderText(songCnt + " song imported!");
+        } else {
+            alert.setHeaderText(songCnt + " songs imported!");
+        }
+
         alert.show();
     }
 
@@ -129,21 +148,29 @@ public class Controller
 
     @FXML protected void handleMenuItemEdit(ActionEvent event)
     {
+        String song = testString;
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("itunes++_edit.fxml"));
+        ControllerEdit controller = new ControllerEdit(editor);
+        loader.setController(controller);
+        Stage stage = new Stage(StageStyle.DECORATED);
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("itunes++_edit.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initStyle(StageStyle.UNDECORATED);
-            stage.setTitle("ITunes++ Edit");
-            stage.setScene(new Scene(root));
-            stage.show();
+            stage.setScene(new Scene(loader.load()));
+            controller.initData(song);
+        }catch(IOException e){
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("File not found");
+            alert.setHeaderText("Unable to locate file: " + song);
+            alert.setContentText("Please double check that your file still exists.");
+            alert.show();
+            return;
         }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        stage.setTitle("ITunes++ Song Editor");
+        stage.show();
     }
 
+//-----------------------------------------------------------------------------
+// NON-GUI METHODS
+//-----------------------------------------------------------------------------
     private void initMediaPlayer(String path){
         Media media = new Media(new File(path).toURI().toString());
         MediaPlayer mp = new MediaPlayer(media);
@@ -151,4 +178,8 @@ public class Controller
         mediaControl.setMediaPlayer(mp);
     }
 
+    private void populateEditWindow(String path) throws IOException{
+        ID3Object id3 = new ID3Object(new File(path));
+
+    }
 }
