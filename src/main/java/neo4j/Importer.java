@@ -168,7 +168,7 @@ public class Importer {
         // create relationship SONG/GENRE
         if(!relationshipExists(
                 Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_ARTIST,
+                Relation.HAS_SONG,
                 Label.SONGNAME, Property.SONG_NAME, songName
         ))
             createRelationshipReciprocal(
@@ -181,7 +181,7 @@ public class Importer {
         // create relationship ALBUM/GENRE
         if(!relationshipExists(
                 Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_ARTIST,
+                Relation.HAS_ALBUM,
                 Label.ALBUM, Property.ALBUM_NAME, album
         ))
             createRelationshipReciprocal(
