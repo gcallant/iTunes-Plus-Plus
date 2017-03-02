@@ -1,28 +1,28 @@
 package guiInterface;
 
 import Utilities.ID3Object;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.*;
-
-import neo4j.DatabaseManager;
-import neo4j.Deleter;
-import neo4j.Editor;
-import neo4j.Importer;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import neo4j.*;
+import org.neo4j.graphdb.Node;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class Controller
@@ -67,6 +67,22 @@ public class Controller
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText("Next song was clicked");
         alert.show();
+    }
+
+    @FXML
+    protected void handleSearchBar(KeyEvent keyEvent)
+    {
+        if(keyEvent.getCode().equals(KeyCode.ENTER))
+        {
+            String searchValue = searchBar.getText();
+            SearchQuery query = new SearchQuery(DatabaseManager.getInstance().getDatabaseConnector());
+           showResults(query.search(searchValue));
+        }
+    }
+
+    private void showResults(List<Node> node)
+    {
+        tViewSongList.setItems((ObservableList) node);
     }
 
     @FXML protected void handleBtnPause(MouseEvent event)

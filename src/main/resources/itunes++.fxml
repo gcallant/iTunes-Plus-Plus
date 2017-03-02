@@ -72,7 +72,7 @@
             </VBox.margin>
         </HBox>
         <MediaControl fx:id="mediaControl" />
-        <TextField id="searchBar" fx:id="searchBar" alignment="CENTER" prefHeight="39.0" prefWidth="598.0" promptText="Enter song name, artist name or genre to search">
+        <TextField id="searchBar" fx:id="searchBar" alignment="CENTER" prefHeight="39.0" onKeyPressed="#handleSearchBar" prefWidth="598.0" promptText="Enter song name, artist name or genre to search">
             <font>
                 <Font size="18.0" />
             </font>

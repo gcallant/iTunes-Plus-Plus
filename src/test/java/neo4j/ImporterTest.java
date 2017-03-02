@@ -18,7 +18,7 @@ public class ImporterTest {
     @Before
     public void setUp() throws Exception{
         _NEOCONNECTION = DatabaseManager.getInstance(DatabaseManager._URL, DatabaseManager._PORT, "iTunes", "iTunes");
-        _NEOCONNECTION.getDatabaseConnector().run("MATCH (n) DETACH DELETE n");
+        //_NEOCONNECTION.getDatabaseConnector().run("MATCH (n) DETACH DELETE n");
     }
 
     @Test
@@ -30,9 +30,10 @@ public class ImporterTest {
         songFiles.add(".mp4");
         songFiles.add(".wmv");
         songFiles.add(".mpeg");
+        songFiles.add(".m4p");
 
         AudioFileIO.logger.setLevel(Level.OFF);
-        importer.addFolderRecursively("E:\\Aaron Goldberg", songFiles);
+        importer.addFolderRecursively("E:\\Andre Kostelanetz, Andre Previn, Columbia Symphony Orchestra, Leonard Bernstein & New York Philharmonic", songFiles);
     }
 
 }
