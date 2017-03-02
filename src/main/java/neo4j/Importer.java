@@ -1,10 +1,11 @@
 package neo4j;
 
-import ID3.ID3Object;
+import Utilities.ID3Object;
 import Utilities.FileHandler;
 import Values.Label;
 import Values.Property;
 import Values.Relation;
+import org.jaudiotagger.audio.AudioFileIO;
 import org.neo4j.driver.v1.Session;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import static org.neo4j.driver.v1.Values.parameters;
  */
 public class Importer {
 
+    private int _songCnt = 0;
     private Session _session;
 
     public Importer(Session session) {
@@ -69,6 +71,13 @@ public class Importer {
         int i = 0;
         for (String songPath : songPaths)
             addSong(songPath, id3s.get(i++));
+        _songCnt += i;
+    }
+
+    public int getSongCount() {
+        int tmp = _songCnt;
+        _songCnt = 0;
+        return tmp;
     }
 
     /**
@@ -159,7 +168,7 @@ public class Importer {
         // create relationship SONG/GENRE
         if(!relationshipExists(
                 Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_ARTIST,
+                Relation.HAS_SONG,
                 Label.SONGNAME, Property.SONG_NAME, songName
         ))
             createRelationshipReciprocal(
@@ -172,7 +181,7 @@ public class Importer {
         // create relationship ALBUM/GENRE
         if(!relationshipExists(
                 Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_ARTIST,
+                Relation.HAS_ALBUM,
                 Label.ALBUM, Property.ALBUM_NAME, album
         ))
             createRelationshipReciprocal(

@@ -1,6 +1,6 @@
 package neo4j;
 
-import ID3.ID3Object;
+import Utilities.ID3Object;
 import Values.Label;
 import Values.Property;
 import org.neo4j.driver.v1.Session;
@@ -31,23 +31,16 @@ public class Editor {
 //-----------------------------------------------------------------------------
 // PUBLIC METHODS
 //-----------------------------------------------------------------------------
-    public void edit(EditRequest req) {
-        ID3Object id3 = null;
-        try {
-            id3 = new ID3Object(new File(req.filename));
-        } catch (IOException e) {
-            System.err.print("Could not edit media properties: "
-                + e.getLocalizedMessage());
-        }
-        editDB(req);
+    public void edit(EditRequest req, ID3Object id3) {
+        req.value = sanitizeString(req.value);
+//        editDB(req);
         updateID3(req, id3);
     }
 
-    public void edit(List<EditRequest> requests) {
+    public void edit(List<EditRequest> requests, ID3Object id3) {
         for (EditRequest req : requests) {
-            edit(req);
+            edit(req, id3);
         }
-
     }
 
 //-----------------------------------------------------------------------------
@@ -90,10 +83,8 @@ public class Editor {
     private void editDB(EditRequest req) {
         StringBuilder query = new StringBuilder();
 
-        sanitizeString(req.value);
-
-        query.append("MATCH (" + req.key + ":" + req.label + ") ");
-        query.append("SET " + req.key + "." + req.prop + " = " + "'" + req.value + "'");
+        query.append("MATCH (").append(req.key).append(":").append(req.label).append(") ");
+        query.append("SET ").append(req.key).append(".").append(req.prop).append(" = '").append(req.value).append("'");
 
         _session.run(query.toString());
     }

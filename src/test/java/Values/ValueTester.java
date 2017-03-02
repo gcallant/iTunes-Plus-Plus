@@ -4,10 +4,9 @@ package Values;
 //neo4j: https://neo4j.com/developer/guide-data-modeling/
 
 
-import ID3.ID3Object;
+import Utilities.ID3Object;
 import org.neo4j.driver.v1.*;
 import org.neo4j.driver.v1.exceptions.ServiceUnavailableException;
-import org.neo4j.test.GraphDescription;
 import scala.collection.mutable.StringBuilder;
 
 import java.io.File;
