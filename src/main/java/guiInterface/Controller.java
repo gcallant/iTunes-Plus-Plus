@@ -1,6 +1,7 @@
 package guiInterface;
 
 import Utilities.ID3Object;
+import Values.Music;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,12 +17,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import neo4j.*;
-import org.neo4j.driver.v1.Record;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class Controller
@@ -41,7 +42,7 @@ public class Controller
     @FXML
     private MenuBar menuBar;
     @FXML
-    private TableView<Record> tViewSongList;
+    private TableView<Music> tViewSongList;
     @FXML
     private TextField searchBar;
 
@@ -75,11 +76,13 @@ public class Controller
         {
             String searchValue = searchBar.getText();
             SearchQuery query = new SearchQuery(DatabaseManager.getInstance().getDatabaseConnector());
-           query.search(searchValue);
+           List<Music> list = query.search(searchValue);
+           
+           showResults((ObservableList)list);
         }
     }
 
-    private void showResults(ObservableList<Record> list)
+    private void showResults(ObservableList<Music> list)
     {
         initTable();
         tViewSongList.setItems(list);

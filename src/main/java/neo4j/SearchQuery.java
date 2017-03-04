@@ -1,11 +1,12 @@
 package neo4j;
 
-import com.sun.javafx.collections.ObservableListWrapper;
+import Values.Music;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,40 +23,27 @@ public class SearchQuery
       this.session = session;
    }
 
-   public List search(String value)
+   public List<Music> search(String value)
    {
-      List<List<Record>> lists = new ArrayList<>();
-      lists.add(new ArrayList<>());
-      lists.add(new ArrayList<>());
-      lists.add(new ArrayList<>());
+      ObservableList<Music> list = FXCollections.observableArrayList();
 
-      insertResults(lists, findSong(value), 0);
-      insertResults(lists, findArtist(value), 1);
-      insertResults(lists, findAlbum(value), 2);
+      insertResults(list, findSong(value));
+      insertResults(list, findArtist(value));
+      insertResults(list, findAlbum(value));
 
-
-
-
-         for(int i = 0; i < lists.size(); i++)
-         {
-            for(List l : lists)
-            {
-               if(! l.isEmpty())
-               {
-                  lists.set(i, new ObservableListWrapper<Record>(l));
-               }
-               i++;
-            }
-         }
-
-      return lists;
+      return list;
    }
 
-   private void insertResults(List<List<Record>> lists, StatementResult result, int index)
+   private void insertResults(List<Music> list, StatementResult result)
    {
       while(result.hasNext())
       {
-         lists.get(index).add(result.next());
+         Record record = result.next();
+         Music musicItem = Music.musicFactory(record);
+         if(!list.contains(musicItem))//Prevents duplicate
+         {
+            list.add(musicItem);
+         }
       }
    }
 
@@ -81,11 +69,5 @@ public class SearchQuery
       params.put("like", String.format("(?i).*%s.*", album));
       String query = "MATCH (a : album) WHERE a.albumName =~ $like RETURN a;";
       return session.run(query, params);
-   }
-
-   private String sanatizeUserInput(String dirtyString)
-   {
-      String copy = dirtyString;
-      return null;
    }
 }
