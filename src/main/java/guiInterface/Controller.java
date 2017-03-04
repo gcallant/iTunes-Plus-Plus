@@ -16,13 +16,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import neo4j.*;
-import org.neo4j.graphdb.Node;
+import org.neo4j.driver.v1.Record;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 public class Controller
@@ -42,7 +41,7 @@ public class Controller
     @FXML
     private MenuBar menuBar;
     @FXML
-    private TableView tViewSongList;
+    private TableView<Record> tViewSongList;
     @FXML
     private TextField searchBar;
 
@@ -76,13 +75,22 @@ public class Controller
         {
             String searchValue = searchBar.getText();
             SearchQuery query = new SearchQuery(DatabaseManager.getInstance().getDatabaseConnector());
-           showResults(query.search(searchValue));
+           query.search(searchValue);
         }
     }
 
-    private void showResults(List<Node> node)
+    private void showResults(ObservableList<Record> list)
     {
-        tViewSongList.setItems((ObservableList) node);
+        initTable();
+        tViewSongList.setItems(list);
+    }
+
+    private void initTable()
+    {
+        TableColumn artist = new TableColumn("Artist");
+        TableColumn album = new TableColumn("Album");
+        TableColumn song = new TableColumn("Song");
+        tViewSongList.getColumns().addAll(song, artist, album);
     }
 
     @FXML protected void handleBtnPause(MouseEvent event)
@@ -123,7 +131,7 @@ public class Controller
         alert.setTitle("Clear All");
         alert.setHeaderText("Clear all contents from database?");
         alert.setContentText("Are you sure you want to clear all contents from database?\n"
-        + "*Note: Your songs will not be deleted.");
+        + "*Note: Your songs (files) will not be deleted.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if(result.get() == ButtonType.OK){

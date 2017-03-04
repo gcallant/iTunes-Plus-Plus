@@ -86,10 +86,7 @@
             </VBox.margin>
             <content>
                 <TableView id="table_view_item_list" fx:id="tViewSongList" prefHeight="200.0" prefWidth="200.0">
-                    <columns>
-                        <TableColumn prefWidth="502.0" text="Name" />
-                        <TableColumn prefWidth="502.0" text="Label" />
-                    </columns>
+                   
                 </TableView>
             </content>
         </ScrollPane>
