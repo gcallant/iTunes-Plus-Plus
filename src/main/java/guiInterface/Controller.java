@@ -1,28 +1,29 @@
 package guiInterface;
 
 import Utilities.ID3Object;
+import Values.Music;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.*;
-
-import neo4j.DatabaseManager;
-import neo4j.Deleter;
-import neo4j.Editor;
-import neo4j.Importer;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import neo4j.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class Controller
@@ -32,7 +33,9 @@ public class Controller
     private Editor editor = new Editor(dbm.getDatabaseConnector());
     private Deleter deleter = new Deleter(dbm.getDatabaseConnector());
 
-    private final String[] SUPPORTED_EXT = {".mp3",".mp4",".wmv",".mpeg"};
+    private final String[] SUPPORTED_EXT = {".mp3",".mp4",".wmv",".mpeg", ".aac",
+                                            ".pcm", ".aif", ".aiff", ".flv", ".fxm",
+                                            ".wav", ".m4a", ".m4v", ".m4p", ".m4r", ".3gp"};
     private final String ROOT_MUSIC_DIR = "src\\main\\resources\\Music";
     private String testString = "src\\main\\resources\\Music\\Blind Melon - No Rain.mp3";
     private ArrayList<String> _searchList;
@@ -42,7 +45,7 @@ public class Controller
     @FXML
     private MenuBar menuBar;
     @FXML
-    private TableView tViewSongList;
+    private TableView<Music> tViewSongList;
     @FXML
     private TextField searchBar;
 
@@ -67,6 +70,43 @@ public class Controller
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText("Next song was clicked");
         alert.show();
+    }
+
+    @FXML
+    protected void handleSearchBar(KeyEvent keyEvent)
+    {
+        if(keyEvent.getCode().equals(KeyCode.ENTER))
+        {
+            String searchValue = searchBar.getText();
+            SearchQuery query = new SearchQuery(DatabaseManager.getInstance().getDatabaseConnector());
+           List<Music> list = query.search(searchValue);
+           
+           showResults((ObservableList<Music>) list);
+        }
+    }
+
+    private void showResults(ObservableList<Music> list)
+    {
+        tViewSongList.getColumns().clear();
+        initTable();
+        tViewSongList.setItems(list);
+    }
+
+    private void initTable()
+    {
+        TableColumn<Music, String> song = new TableColumn<Music, String>("Song");
+        song.setCellValueFactory(new PropertyValueFactory<Music, String>("Song"));
+
+        TableColumn<Music, String> artist = new TableColumn<Music, String>("Artist");
+        artist.setCellValueFactory(new PropertyValueFactory<Music, String>("Artist"));
+
+        TableColumn<Music, String> album = new TableColumn<Music, String>("Album");
+        album.setCellValueFactory(new PropertyValueFactory<Music, String>("Album"));
+
+        TableColumn<Music, String> genre = new TableColumn<Music, String>("Genre");
+        genre.setCellValueFactory(new PropertyValueFactory<Music, String>("Genre"));
+        
+        tViewSongList.getColumns().addAll(song, artist, album, genre);
     }
 
     @FXML protected void handleBtnPause(MouseEvent event)
@@ -107,7 +147,7 @@ public class Controller
         alert.setTitle("Clear All");
         alert.setHeaderText("Clear all contents from database?");
         alert.setContentText("Are you sure you want to clear all contents from database?\n"
-        + "*Note: Your songs will not be deleted.");
+        + "*Note: Your songs (files) will not be deleted.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if(result.get() == ButtonType.OK){

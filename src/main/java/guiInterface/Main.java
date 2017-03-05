@@ -19,8 +19,9 @@ public class Main extends Application
    public void start(Stage primaryStage) throws Exception
    {
       Parent root = FXMLLoader.load(getClass().getResource("/itunes++.fxml"));
-
+      
       Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+      
       primaryStage.setTitle("iTunes++");
       primaryStage.setScene(new Scene(root, 300, 275));
       primaryStage.setX(screenBounds.getMinX());
