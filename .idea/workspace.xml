@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6ed4d913-b860-4516-b59b-7ad1089fe6b5" name="Default" comment="Working on building property data format&#10;&#10;Trying to figure out the property properties to return to get all needed values into Music factory.">
+    <list default="true" id="6ed4d913-b860-4516-b59b-7ad1089fe6b5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.travis.yml" afterPath="$PROJECT_DIR$/.travis.yml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Values/Music.java" afterPath="$PROJECT_DIR$/src/main/java/Values/Music.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/guiInterface/Controller.java" afterPath="$PROJECT_DIR$/src/main/java/guiInterface/Controller.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/neo4j/SearchQuery.java" afterPath="$PROJECT_DIR$/src/main/java/neo4j/SearchQuery.java" />
     </list>
@@ -23,28 +21,27 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Music.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/Values/Music.java">
+      <file leaf-file-name="Controller.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/guiInterface/Controller.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="623">
-              <caret line="42" column="47" lean-forward="false" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
+            <state relative-caret-position="220">
+              <caret line="61" column="34" lean-forward="false" selection-start-line="61" selection-start-column="34" selection-end-line="61" selection-end-column="34" />
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#1636#1637#0" expanded="true" />
-                <element signature="e#1661#1662#0" expanded="true" />
+                <element signature="e#3070#3085#0" expanded="true" />
+                <element signature="e#3238#3253#0" expanded="true" />
+                <element signature="e#3411#3426#0" expanded="true" />
+                <element signature="e#3581#3596#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SearchQuery.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/neo4j/SearchQuery.java">
+      <file leaf-file-name="Media.java" pinned="false" current-in-tab="false">
+        <entry file="jar://C:/Program Files/Java/jdk1.8.0_121/javafx-src.zip!/javafx/scene/media/Media.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="544">
-              <caret line="64" column="0" lean-forward="false" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state relative-caret-position="-902">
+              <caret line="77" column="19" lean-forward="false" selection-start-line="77" selection-start-column="19" selection-end-line="77" selection-end-column="19" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -122,10 +119,10 @@
         <option value="$PROJECT_DIR$/src/main/java/guiInterface/Main.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/resources/itunes++.fxml" />
-        <option value="$PROJECT_DIR$/src/main/java/neo4j/SearchQuery.java" />
-        <option value="$PROJECT_DIR$/src/main/java/guiInterface/Controller.java" />
         <option value="$PROJECT_DIR$/.travis.yml" />
         <option value="$PROJECT_DIR$/src/main/java/Values/Music.java" />
+        <option value="$PROJECT_DIR$/src/main/java/neo4j/SearchQuery.java" />
+        <option value="$PROJECT_DIR$/src/main/java/guiInterface/Controller.java" />
       </list>
     </option>
   </component>
@@ -1055,7 +1052,7 @@
       <workItem from="1488414800391" duration="1337000" />
       <workItem from="1488416263094" duration="26915000" />
       <workItem from="1488612596406" duration="14933000" />
-      <workItem from="1488696171795" duration="4170000" />
+      <workItem from="1488696171795" duration="5703000" />
     </task>
     <task id="LOCAL-00001" summary="Still having troubles with my neo4j api.. Thought if I commit this Deleter class, maybe it will see the api.">
       <created>1486532177558</created>
@@ -1134,7 +1131,14 @@
       <option name="project" value="LOCAL" />
       <updated>1488660705283</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Implemented GUI table output">
+      <created>1488700396179</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1488700396179</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1164,7 +1168,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="63661000" />
+    <option name="totallyTimeSpent" value="65194000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -1253,7 +1257,8 @@
     <MESSAGE value="Fixed the verbose logging issue with jaudiotagger" />
     <MESSAGE value="Implemented some search querying abilities" />
     <MESSAGE value="Working on building property data format&#10;&#10;Trying to figure out the property properties to return to get all needed values into Music factory." />
-    <option name="LAST_COMMIT_MESSAGE" value="Working on building property data format&#10;&#10;Trying to figure out the property properties to return to get all needed values into Music factory." />
+    <MESSAGE value="Implemented GUI table output" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented GUI table output" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1285,20 +1290,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$MAVEN_REPOSITORY$/org/neo4j/driver/neo4j-java-driver/1.1.2/neo4j-java-driver-1.1.2-sources.jar!/org/neo4j/driver/internal/security/TLSSocketChannel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="442" column="0" lean-forward="false" selection-start-line="442" selection-start-column="0" selection-end-line="442" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/neo4j/driver/neo4j-java-driver/1.1.2/neo4j-java-driver-1.1.2-sources.jar!/org/neo4j/driver/internal/net/SocketClient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="212" column="0" lean-forward="false" selection-start-line="212" selection-start-column="0" selection-end-line="212" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/neo4j/driver/neo4j-java-driver/1.1.2/neo4j-java-driver-1.1.2-sources.jar!/org/neo4j/driver/internal/net/SocketConnection.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="175">
@@ -1628,19 +1619,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/guiInterface/Controller.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="682">
-          <caret line="87" column="43" lean-forward="false" selection-start-line="87" selection-start-column="43" selection-end-line="87" selection-end-column="43" />
-          <folding>
-            <element signature="e#2885#2900#0" expanded="true" />
-            <element signature="e#3053#3068#0" expanded="true" />
-            <element signature="e#3226#3241#0" expanded="true" />
-            <element signature="e#3396#3411#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/neo4j/DatabaseManagerTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
@@ -1675,7 +1653,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/Values/Music.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="623">
+        <state relative-caret-position="227">
           <caret line="42" column="47" lean-forward="false" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -1687,10 +1665,39 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/neo4j/SearchQuery.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="64" column="0" lean-forward="false" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+        <state relative-caret-position="249">
+          <caret line="32" column="35" lean-forward="false" selection-start-line="32" selection-start-column="35" selection-end-line="32" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/neo4j/Queries.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_121/javafx-src.zip!/javafx/scene/media/Media.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-902">
+          <caret line="77" column="19" lean-forward="false" selection-start-line="77" selection-start-column="19" selection-end-line="77" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/guiInterface/Controller.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="61" column="34" lean-forward="false" selection-start-line="61" selection-start-column="34" selection-end-line="61" selection-end-column="34" />
+          <folding>
+            <element signature="e#3070#3085#0" expanded="true" />
+            <element signature="e#3238#3253#0" expanded="true" />
+            <element signature="e#3411#3426#0" expanded="true" />
+            <element signature="e#3581#3596#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -33,7 +33,9 @@ public class Controller
     private Editor editor = new Editor(dbm.getDatabaseConnector());
     private Deleter deleter = new Deleter(dbm.getDatabaseConnector());
 
-    private final String[] SUPPORTED_EXT = {".mp3",".mp4",".wmv",".mpeg"};
+    private final String[] SUPPORTED_EXT = {".mp3",".mp4",".wmv",".mpeg", ".aac",
+                                            ".pcm", ".aif", ".aiff", ".flv", ".fxm",
+                                            ".wav", ".m4a", ".m4v", ".m4p", ".m4r", ".3gp"};
     private final String ROOT_MUSIC_DIR = "src\\main\\resources\\Music";
     private String testString = "src\\main\\resources\\Music\\Blind Melon - No Rain.mp3";
     private ArrayList<String> _searchList;

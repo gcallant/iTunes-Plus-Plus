@@ -30,6 +30,7 @@ public class SearchQuery
       insertResults(list, findSong(value));
       insertResults(list, findArtist(value));
       insertResults(list, findAlbum(value));
+      insertResults(list, findGenre(value));
 
       return list;
    }
@@ -51,7 +52,7 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", artist));
-      String query = "MATCH (a : artist) WHERE a.artistName =~ $like RETURN a;";
+      String query = "MATCH (a : artist)-[:hasSong]->(s)-[:hasAlbum]->(al)-[:hasGenre]->(g) WHERE a.artistName =~ $like RETURN a,s,al,g;";
       return session.run(query, params);
    }
 
@@ -67,7 +68,15 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", album));
-      String query = "MATCH (a : album) WHERE a.albumName =~ $like RETURN a;";
+      String query = "MATCH (al : album)-[:hasArtist]->(a)-[:hasSong]->(s)-[:hasGenre]->(g) WHERE al.albumName =~ $like RETURN al,a,s,g;";
+      return session.run(query, params);
+   }
+
+   public StatementResult findGenre(String genre)
+   {
+      Map<String, Object> params = new HashMap<>(1);
+      params.put("like", String.format("(?i).*%s.*", genre));
+      String query = "MATCH (g : genre)-[:hasArtist]->(a)-[:hasSong]->(s)-[:hasAlbum]->(al) WHERE g.genreName =~ $like RETURN al,a,s,g;";
       return session.run(query, params);
    }
 }
