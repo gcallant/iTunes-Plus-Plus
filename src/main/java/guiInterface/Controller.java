@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -78,22 +79,32 @@ public class Controller
             SearchQuery query = new SearchQuery(DatabaseManager.getInstance().getDatabaseConnector());
            List<Music> list = query.search(searchValue);
            
-           showResults((ObservableList)list);
+           showResults((ObservableList<Music>) list);
         }
     }
 
     private void showResults(ObservableList<Music> list)
     {
+        tViewSongList.getColumns().clear();
         initTable();
         tViewSongList.setItems(list);
     }
 
     private void initTable()
     {
-        TableColumn artist = new TableColumn("Artist");
-        TableColumn album = new TableColumn("Album");
-        TableColumn song = new TableColumn("Song");
-        tViewSongList.getColumns().addAll(song, artist, album);
+        TableColumn<Music, String> song = new TableColumn<Music, String>("Song");
+        song.setCellValueFactory(new PropertyValueFactory<Music, String>("Song"));
+
+        TableColumn<Music, String> artist = new TableColumn<Music, String>("Artist");
+        artist.setCellValueFactory(new PropertyValueFactory<Music, String>("Artist"));
+
+        TableColumn<Music, String> album = new TableColumn<Music, String>("Album");
+        album.setCellValueFactory(new PropertyValueFactory<Music, String>("Album"));
+
+        TableColumn<Music, String> genre = new TableColumn<Music, String>("Genre");
+        genre.setCellValueFactory(new PropertyValueFactory<Music, String>("Genre"));
+        
+        tViewSongList.getColumns().addAll(song, artist, album, genre);
     }
 
     @FXML protected void handleBtnPause(MouseEvent event)

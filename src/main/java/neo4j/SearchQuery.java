@@ -59,7 +59,7 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", song));
-      String query = "MATCH (s : song) WHERE s.songName =~ $like RETURN s;";
+      String query = "MATCH (s : song)-[:hasArtist]->(a)-[:hasAlbum]->(al)-[:hasGenre]->(g) WHERE s.songName =~ $like RETURN s,a,al,g;";
       return session.run(query, params);
    }
 
