@@ -3,6 +3,8 @@ package neo4j;
 import org.neo4j.driver.v1.*;
 import Values.*;
 
+import java.util.List;
+
 /**
  * Created by Ryan on 2/7/2017.
  *
@@ -32,65 +34,62 @@ public class Deleter {
         _session.run(clearAll);
     }
 
-    public void deleteSong(String key){
-//        String album = _qHandler.findAlbum(key);
-//        String artist = _qHandler.findArtist(key);
-//        String genre = _qHandler.findGenre(key);
-
-        delete(key, Label.SONGNAME);
-
-//        deleteOnEmpty(album, Label.ALBUM);
-//        deleteOnEmpty(artist, Label.ARTIST);
-//        deleteOnEmpty(genre, Label.GENRE);
-    }
-
-    public void deleteSongs(String...keys){
-        for(String s : keys){
-            deleteSong(s);
+    public void delete(List<String> IDs){
+        for(String s : IDs){
+            delete(s);
         }
     }
 
     //deletes node IF there are no relations to it
-    public void deleteOnEmpty(String key, String label){
-        if(!hasRelations(key, label)){
-            delete(key, label);
+    void deleteOnEmpty(String ID){
+        if(!hasSongs(ID)){
+            delete(ID);
         }
     }
 
-    public void deleteRelationship(String key1, String label1, String key2, String label2){
-        StringBuilder query = new StringBuilder();
-        query.append("MATCH (").append(key1).append(":").append(label1).append(")");
-        query.append("-[r:*]-(").append(key2).append(":").append(label2).append(")");
-        query.append("DELETE r");
+    void deleteSongOnEmpty(String ID){
+        if(!hasRelationships(ID)){
+            delete(ID);
+        }
+    }
+
+    void deleteRelationship(String ID1, String label1, String ID2, String label2){
+        String query = "MATCH (n:"+label1+")-[r]-(m:"+label2+") WHERE id(n)="+ID1
+            + " AND id(m)="+ID2+" DELETE r";
+
+        _session.run(query);
     }
 
 //-----------------------------------------------------------------------------
 // PRIVATE METHODS
 //-----------------------------------------------------------------------------
-    private void delete(String key, String label){
-        StringBuilder query = new StringBuilder();
+    private void delete(String ID){
+        String query = "MATCH (n) WHERE id(n)="+ID+" DETACH DELETE n";
 
-        query.append("MATCH (" + key + ":" + label + ")");
-        query.append("DETACH DELETE " + key);
-
-        _session.run(query.toString());
+        _session.run(query);
     }
 
-    private boolean hasRelations(String key, String label){
-        int relCnt = 0;
-        StringBuilder query = new StringBuilder();
+    private boolean hasRelationships(String ID){
+        int relCnt;
+        String query = "MATCH (n)-[r]-(a) WHERE id(n)="+ID+" RETURN COUNT(r)";
 
-        query.append("MATCH (" + key + ":" + label + ")-[*]-() ");
-        query.append("RETURN COUNT(*)");
-
-        StatementResult result = _session.run(query.toString());
-
-        while(result.hasNext()){
-            Record record = result.next();
-            relCnt += record.get(0).asInt();
-        }
+        StatementResult result = _session.run(query);
+        Record record = result.next();
+        relCnt = record.get(0).asInt();
 
         return (relCnt > 0);
+    }
+
+    private boolean hasSongs(String ID){
+        int songCnt;
+        String query = "MATCH (n)-[:"+Relation.HAS_SONG+"]->(a) "
+            + "WHERE id(n)="+ID+" RETURN COUNT(a)";
+
+        StatementResult result = _session.run(query);
+        Record record = result.next();
+        songCnt = record.get(0).asInt();
+
+        return (songCnt > 0);
     }
 
 

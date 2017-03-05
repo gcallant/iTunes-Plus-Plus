@@ -6,7 +6,9 @@ import Values.Label;
 import Values.Property;
 import Values.Relation;
 import org.jaudiotagger.audio.AudioFileIO;
+import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -119,6 +121,7 @@ public class Importer {
         String artist = sanitizeString(id3.getArtist());
         String composer = sanitizeString(id3.getComposer());
         String comment = sanitizeString(id3.getComment());
+        String discNo = sanitizeString(id3.getDiscNo());
         String songName = sanitizeString(id3.getTitle());
         String track = sanitizeString(id3.getTrack());
         String year = sanitizeString(id3.getYear());
@@ -137,6 +140,7 @@ public class Importer {
                     Property.SONG_NAME, songName,
                     Property.TRACK_NUM, track,
                     Property.COMMENT, comment,
+                    Property.DISC_NO, discNo,
                     Property.YEAR, year,
                     Property.COMPOSER_NAME, composer,
                     Property.FILENAME, fileName);
@@ -287,11 +291,16 @@ public class Importer {
     public boolean relationshipExists(String label1, String property1, String value1, String relationship,
                                        String label2, String property2, String value2) {
 
-        String query = "MATCH (" + label1 + ":" + label1 + ")-[:" + relationship + "]->(" + label2 + ":" + label2 + ") " +
-                "WHERE " + label1 + "." + property1 + " = \"" + value1 + "\" " +
-                "AND " + label2 + "." + property2 + " = \"" + value2 + "\" " +
-                "RETURN " + label1 + "." + property1 + ", " + label2 + "." + property2;
+        String query = "MATCH (n:" + label1 + ")-[r:" + relationship + "]->(m:" + label2 + ") " +
+                "WHERE n." + property1 + " = \"" + value1 + "\" " +
+                "AND m." + property2 + " = \"" + value2 + "\" " +
+//                "RETURN n." + property1 + ", m." + property2;
+               "RETURN SIGN(COUNT(r))";
 
-       return _session.run(query).hasNext();
+        StatementResult result = _session.run(query);
+        Record record = result.next();
+        return record.get(0).asInt() > 0;
+
+//       return _session.run(query).hasNext();
     }
 }
