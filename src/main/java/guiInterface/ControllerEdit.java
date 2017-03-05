@@ -25,7 +25,7 @@ public class ControllerEdit {
     private ID3Object id3;
     //Starting values for tags
     private String sTitle, sArtist, sAlbum, sGenre, sDisc, sTrack, sYear, sComp, sComm;
-    private String keySong, keyArtist, keyAlbum, keyGenre;
+    private String songID, artistID, albumID, genreID;
     @FXML
     private TextField title;
     @FXML
@@ -80,7 +80,7 @@ public class ControllerEdit {
         if((editRequest = checkYear(year.getText())) != null)
             reqList.add(editRequest);
 
-        if((reqCnt = reqList.size()) > 0) editor.edit(reqList, id3);
+        if((reqCnt = reqList.size()) > 0) editor.edit(reqList);
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
 
@@ -118,10 +118,10 @@ public class ControllerEdit {
         track.setText(sTrack = id3.getTrack());
         year.setText(sYear = id3.getYear());
 
-//        keyAlbum = searchAlbum(sAlbum);
-//        keyArtist = searchArtist(sArtist);
-//        keyGenre = searchGenre(sGenre);
-//        keySong = searchSong(sTitle);
+//        AlbumID= searchAlbum(sAlbum);
+//        ArtistID= searchArtist(sArtist);
+//        GenreID= searchGenre(sGenre);
+//        SongID= searchSong(sTitle);
     }
 
 //-----------------------------------------------------------------------------
@@ -129,46 +129,46 @@ public class ControllerEdit {
 //-----------------------------------------------------------------------------
     private EditRequest checkAlbum(String nAlbum){
         if(nAlbum.equals(sAlbum)) return null;
-        return new EditRequest(keyAlbum, Label.ALBUM, Property.ALBUM_NAME, nAlbum);
+        return new EditRequest(albumID, Label.ALBUM, Property.ALBUM_NAME, nAlbum);
     }
 
     private EditRequest checkArtist(String nArtist){
         if(nArtist.equals(sArtist)) return null;
-        return new EditRequest(keyArtist, Label.ARTIST, Property.ARTIST_NAME, nArtist);
+        return new EditRequest(artistID, Label.ARTIST, Property.ARTIST_NAME, nArtist);
     }
 
     private EditRequest checkComment(String nComm){
         if(nComm.equals(sComm)) return null;
-        return new EditRequest(keySong, Label.SONGNAME, Property.COMMENT, nComm);
+        return new EditRequest(songID, Label.SONGNAME, Property.COMMENT, nComm);
     }
 
     private EditRequest checkComposer(String nComp){
         if(nComp.equals(sComp)) return null;
-        return new EditRequest(keySong, Label.SONGNAME, Property.COMPOSER_NAME, nComp);
+        return new EditRequest(songID, Label.SONGNAME, Property.COMPOSER_NAME, nComp);
     }
 
     private EditRequest checkDiscNo(String nDisc){
         if(nDisc.equals(sDisc)) return null;
-        return new EditRequest(keySong, Label.SONGNAME, Property.DISC_NO, nDisc);
+        return new EditRequest(songID, Label.SONGNAME, Property.DISC_NO, nDisc);
     }
 
     private EditRequest checkGenre(String nGenre){
         if(nGenre.equals(sGenre)) return null;
-        return new EditRequest(keyGenre, Label.GENRE, Property.GENRE_NAME, nGenre);
+        return new EditRequest(genreID, Label.GENRE, Property.GENRE_NAME, nGenre);
     }
 
     private EditRequest checkTitle(String nTitle){
         if(nTitle.equals(sTitle)) return null;
-        return new EditRequest(keySong, Label.SONGNAME, Property.SONG_NAME, nTitle);
+        return new EditRequest(songID, Label.SONGNAME, Property.SONG_NAME, nTitle);
     }
 
     private EditRequest checkTrack(String nTrack){
         if(nTrack.equals(sTrack)) return null;
-        return new EditRequest(keySong, Label.SONGNAME, Property.TRACK_NUM, nTrack);
+        return new EditRequest(songID, Label.SONGNAME, Property.TRACK_NUM, nTrack);
     }
 
     private EditRequest checkYear(String nYear){
         if(nYear.equals(sYear)) return null;
-        return new EditRequest(keySong, Label.SONGNAME, Property.YEAR, nYear);
+        return new EditRequest(songID, Label.SONGNAME, Property.YEAR, nYear);
     }
 }
