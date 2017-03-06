@@ -25,6 +25,7 @@ import java.io.File;
  * Thanks to
  */
 public class MediaControl extends BorderPane {
+    private Controller controller;
     private MediaPlayer mp;
     private boolean atEndOfMedia = false;
     private Duration duration;
@@ -84,9 +85,13 @@ public class MediaControl extends BorderPane {
         {
             // rewind the movie if we're sitting at the end
             if (atEndOfMedia) {
-                System.out.println("End of Media");
-                mp.seek(mp.getStartTime());
-                atEndOfMedia = false;
+                if(controller != null){
+                    controller.playNextSong();
+                } else {
+                    System.out.println("End of Media");
+                    mp.seek(mp.getStartTime());
+                    atEndOfMedia = false;
+                }
             }
             mp.play();
         }
@@ -157,6 +162,10 @@ public class MediaControl extends BorderPane {
         if(mp != null){
             mp.dispose();
         }
+    }
+
+    public void setController(Controller controller){
+        this.controller = controller;
     }
 
 //-----------------------------------------------------------------------------

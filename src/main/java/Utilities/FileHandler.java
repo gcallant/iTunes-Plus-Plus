@@ -1,6 +1,7 @@
 package Utilities;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,8 +46,13 @@ public class FileHandler {
                 getAllFilesAndID3s(file, type, songPaths, id3s);
 
         else if(root.isFile() && root.getName().endsWith(type)) {
-            songPaths.add(root.getAbsolutePath());
-            id3s.add(getID3fromFile(root));
+            try{
+                ID3Object id3 = getID3fromFile(root);
+                id3s.add(id3);
+                songPaths.add(root.getAbsolutePath());
+            } catch(IOException e){
+                System.err.println(e.getLocalizedMessage());
+            }
         }
     }
 
@@ -56,12 +62,8 @@ public class FileHandler {
      * @param songFile - song file pointer
      * @return - the ID3Object
      */
-    private static ID3Object getID3fromFile(File songFile){
-        try {
-            return new ID3Object(songFile);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
+    private static ID3Object getID3fromFile(File songFile)throws IOException{
+        ID3Object id3 = new ID3Object(songFile);
+        return id3;
     }
 }

@@ -1,14 +1,13 @@
 package neo4j;
 
 import Utilities.ID3Object;
+import Utilities.Sanitizer;
 import Values.Label;
 import Values.Property;
 import Values.PropertySet;
 import Values.Relation;
 
-import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -33,12 +32,14 @@ public class Editor {
 // PARAMS
 //-----------------------------------------------------------------------------
     private Session _session;
+    private Finder _finder;
 
 //-----------------------------------------------------------------------------
 // CONSTRUCTORS
 //-----------------------------------------------------------------------------
     public Editor(Session session) {
         _session = session;
+        _finder = new Finder(_session);
     }
 
 //-----------------------------------------------------------------------------
@@ -65,76 +66,84 @@ public class Editor {
 //-----------------------------------------------------------------------------
 // PRIVATE METHODS
 //-----------------------------------------------------------------------------
-    private void createRelationships(Importer importer, EditRequest req){
-        // create relationship ARTIST/GENRE -----------------------------------
-        if(!importer.relationshipExists(
-                Label.GENRE, Property.GENRE_NAME, req.genre,
-                Relation.HAS_ARTIST,
-                Label.ARTIST, Property.ARTIST_NAME, req.artist
-        )) {
-            importer.createRelationshipReciprocal(
+    private void createRelationships(Importer importer, EditRequest req,
+        boolean artistExists, boolean albumExists, boolean genreExists){
+        // create relationship ARTIST/GENRE
+        if(artistExists && genreExists) {
+            if (!importer.relationshipExists(
                     Label.GENRE, Property.GENRE_NAME, req.genre,
                     Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, req.artist,
-                    Relation.HAS_GENRE
-            );
+                    Label.ARTIST, Property.ARTIST_NAME, req.artist)
+                    )
+                importer.createRelationshipReciprocal(
+                        Label.GENRE, Property.GENRE_NAME, req.genre,
+                        Relation.HAS_ARTIST,
+                        Label.ARTIST, Property.ARTIST_NAME, req.artist,
+                        Relation.HAS_GENRE
+                );
         }
-
-        // create relationship SONG/GENRE -------------------------------------
-        if(!importer.relationshipExists(
-                Label.GENRE, Property.GENRE_NAME, req.genre,
-                Relation.HAS_SONG,
-                Label.SONGNAME, Property.SONG_NAME, req.title
-        ))
-            importer.createRelationshipReciprocal(
+        // create relationship SONG/GENRE
+        if(genreExists) {
+            if (!importer.relationshipExists(
                     Label.GENRE, Property.GENRE_NAME, req.genre,
                     Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, req.title,
-                    Relation.HAS_GENRE
-            );
-
-        // create relationship ALBUM/GENRE ------------------------------------
-        if(!importer.relationshipExists(
-                Label.GENRE, Property.GENRE_NAME, req.genre,
-                Relation.HAS_ALBUM,
-                Label.ALBUM, Property.ALBUM_NAME, req.album
-        ))
-            importer.createRelationshipReciprocal(
+                    Label.SONGNAME, Property.SONG_NAME, req.title)
+                    )
+                importer.createRelationshipReciprocal(
+                        Label.GENRE, Property.GENRE_NAME, req.genre,
+                        Relation.HAS_SONG,
+                        Label.SONGNAME, Property.SONG_NAME, req.title,
+                        Relation.HAS_GENRE
+                );
+        }
+        // create relationship ALBUM/GENRE
+        if(albumExists && genreExists) {
+            if (!importer.relationshipExists(
                     Label.GENRE, Property.GENRE_NAME, req.genre,
                     Relation.HAS_ALBUM,
-                    Label.ALBUM, Property.ALBUM_NAME, req.album,
-                    Relation.HAS_GENRE
-            );
-
-        // create relationship ARTIST/SONG ------------------------------------
-        if (!importer.relationshipExists(
-                Label.ARTIST, Property.ARTIST_NAME, req.artist,
-                Relation.HAS_SONG,
-                Label.SONGNAME, Property.SONG_NAME, req.title))
-            importer.createRelationshipReciprocal(
+                    Label.ALBUM, Property.ALBUM_NAME, req.album)
+                    )
+                importer.createRelationshipReciprocal(
+                        Label.GENRE, Property.GENRE_NAME, req.genre,
+                        Relation.HAS_ALBUM,
+                        Label.ALBUM, Property.ALBUM_NAME, req.album,
+                        Relation.HAS_GENRE
+                );
+        }
+        // create relationship ARTIST/SONG
+        if(artistExists) {
+            if (!importer.relationshipExists(
                     Label.ARTIST, Property.ARTIST_NAME, req.artist,
                     Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, req.title,
-                    Relation.HAS_ARTIST
-            );
-
-        // create relationship ALBUM/ARTIST -----------------------------------
-        if (!importer.relationshipExists(
-                Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_ARTIST,
-                Label.ARTIST, Property.ARTIST_NAME, req.artist))
-            importer.createRelationshipReciprocal(
+                    Label.SONGNAME, Property.SONG_NAME, req.title)
+                    )
+                importer.createRelationshipReciprocal(
+                        Label.ARTIST, Property.ARTIST_NAME, req.artist,
+                        Relation.HAS_SONG,
+                        Label.SONGNAME, Property.SONG_NAME, req.title,
+                        Relation.HAS_ARTIST);
+        }
+        // create relationship ALBUM/ARTIST
+        if(albumExists && artistExists) {
+            if (!importer.relationshipExists(
                     Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, req.artist, Relation.HAS_ALBUM
-            );
-
-        // create relationship ALBUM/SONG -------------------------------------
-        if (!importer.relationshipExists(
-                Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_SONG,
-                Label.SONGNAME, Property.SONG_NAME, req.title))
-            importer.createRelationshipReciprocal(
+                    Label.ARTIST, Property.ARTIST_NAME, req.artist)
+                    )
+                importer.createRelationshipReciprocal(
+                        Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_ARTIST,
+                        Label.ARTIST, Property.ARTIST_NAME, req.artist, Relation.HAS_ALBUM);
+        }
+        // create relationship ALBUM/SONG
+        if(albumExists) {
+            if (!importer.relationshipExists(
                     Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, req.title, Relation.HAS_ALBUM
-            );
+                    Label.SONGNAME, Property.SONG_NAME, req.title)
+                    )
+                importer.createRelationshipReciprocal(
+                        Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_SONG,
+                        Label.SONGNAME, Property.SONG_NAME, req.title, Relation.HAS_ALBUM
+                );
+        }
     }
 
     private void updateID3(EditRequest req, ID3Object id3){
@@ -161,13 +170,13 @@ public class Editor {
      */
     private void delOldNodes(EditRequest req){
         Deleter deleter = new Deleter(_session);
-        String songID = findIDByProperty(Label.SONGNAME,
-                new PropertySet(Property.SONG_NAME, req.title));
-        String albumID = findIDByProperty(Label.ALBUM,
+        String songID = _finder.findIDByProperty(Label.SONGNAME,
+                new PropertySet(Property.FILENAME, req.filename));
+        String albumID = _finder.findIDByProperty(Label.ALBUM,
                 new PropertySet(Property.ALBUM_NAME, req.album));
-        String artistID = findIDByProperty(Label.ARTIST,
+        String artistID = _finder.findIDByProperty(Label.ARTIST,
                 new PropertySet(Property.ARTIST_NAME, req.artist));
-        String genreID = findIDByProperty(Label.GENRE,
+        String genreID = _finder.findIDByProperty(Label.GENRE,
                 new PropertySet(Property.GENRE_NAME, req.genre));
 
         deleter.deleteSongOnEmpty(songID);
@@ -185,70 +194,43 @@ public class Editor {
         EditRequest original = req.getOriginal();
         Deleter deleter = new Deleter(_session);
         Importer importer = new Importer(_session);
+        String songID = _finder.findIDByProperty(Label.SONGNAME,
+                new PropertySet(Property.FILENAME, req.filename));
+
+        boolean artistExists, albumExists, genreExists;
 
         // set song -----------------------------------------------------------
-        if (!importer.nodeExists(Label.SONGNAME, Property.SONG_NAME, req.title)) {
-            if(req.title != null){if(!req.title.equals("")) {
-                importer.createNode(Label.SONGNAME, Property.SONG_NAME, req.title);
-            }}
-        }
-        String newSongID = findIDByProperty(Label.SONGNAME,
-                new PropertySet(Property.SONG_NAME, req.title));
-        String oldSongID = findIDByProperty(Label.SONGNAME,
-                new PropertySet(Property.SONG_NAME, original.title));
-        LinkedList<PropertySet> songProperties = PropertySet.populateSongProperties(req);
-        setPropertyByID(newSongID, songProperties);
+        LinkedList<PropertySet> songProperties =
+                PropertySet.populateSongProperties(req);
+        setPropertyByID(songID, songProperties);
 
         // set artist ---------------------------------------------------------
-        if (!importer.nodeExists(Label.ARTIST, Property.ARTIST_NAME, req.artist)) {
-            if(req.artist != null){if(!req.artist.equals("")) {
-                importer.createNode(Label.ARTIST, Property.ARTIST_NAME, req.artist);
-            }}
-        }
+        artistExists = importer.createIfNotExists(
+                Label.ARTIST,Property.ARTIST_NAME,req.artist);
         if(!req.sameArtist()){
-            String artistID = findIDByProperty(Label.ARTIST,
+            String artistID = _finder.findIDByProperty(Label.ARTIST,
                     new PropertySet(Property.ARTIST_NAME, original.artist));
-            deleter.deleteRelationship(oldSongID, Label.SONGNAME, artistID, Label.ARTIST);
+            deleter.deleteRelationship(songID, Label.SONGNAME, artistID, Label.ARTIST);
         }
 
         // set album ----------------------------------------------------------
-        if (!importer.nodeExists(Label.ALBUM, Property.ALBUM_NAME, req.album)) {
-            if(req.album != null){if(!req.album.equals("")) {
-                importer.createNode(Label.ALBUM,
-                        Property.ALBUM_NAME, req.album,
-                        Property.YEAR, req.year);
-            }}
-        }
+        albumExists = importer.createIfNotExists(
+                Label.ALBUM,Property.ALBUM_NAME,req.album);
         if(!req.sameAlbum()){
-            String albumID = findIDByProperty(Label.ALBUM,
+            String albumID = _finder.findIDByProperty(Label.ALBUM,
                     new PropertySet(Property.ALBUM_NAME, original.album));
-            deleter.deleteRelationship(oldSongID, Label.SONGNAME, albumID, Label.ALBUM);
+            deleter.deleteRelationship(songID, Label.SONGNAME, albumID, Label.ALBUM);
         }
         // set genre ----------------------------------------------------------
-        if (!importer.nodeExists(Label.GENRE, Property.GENRE_NAME, req.genre)) {
-            if(req.genre != null){if(!req.genre.equals("")) {
-                importer.createNode(Label.GENRE, Property.GENRE_NAME, req.genre);
-            }}
-        }
+        genreExists = importer.createIfNotExists(
+                Label.GENRE,Property.GENRE_NAME,req.genre);
         if(!req.sameGenre()){
-            String genreID = findIDByProperty(Label.GENRE,
+            String genreID = _finder.findIDByProperty(Label.GENRE,
                     new PropertySet(Property.GENRE_NAME, original.genre));
-            deleter.deleteRelationship(oldSongID, Label.SONGNAME, genreID, Label.GENRE);
+            deleter.deleteRelationship(songID, Label.SONGNAME, genreID, Label.GENRE);
         }
 
-        createRelationships(importer, req);
-    }
-
-    private String findIDByProperty(String label, PropertySet set){
-        String ID;
-        String query = "MATCH (n:"+label+" {"+set.prop+": \""
-                + set.val+"\"}) RETURN id(n)";
-
-        StatementResult result = _session.run(query);
-        Record record = result.next();
-        ID = Integer.toString(record.get(0).asInt());
-
-        return ID;
+        createRelationships(importer, req, artistExists, albumExists, genreExists);
     }
 
     private void setPropertyByID(String ID, List<PropertySet> sets){
@@ -263,27 +245,22 @@ public class Editor {
                 query.append(",");
             }
             query.append(" n.").append(set.prop)
-            .append(" = '").append(set.val).append("'");
+            .append(" = \"").append(set.val).append("\"");
         }
         _session.run(query.toString());
     }
 
     private void sanitize(EditRequest req){
-        req.album = sanitizeString(req.album);
-        req.artist = sanitizeString(req.artist);
-        req.composer = sanitizeString(req.comment);
-        req.comment = sanitizeString(req.composer);
-        req.discNo = sanitizeString(req.discNo);
-        req.title = sanitizeString(req.title);
-        req.track = sanitizeString(req.track);
-        req.year = sanitizeString(req.year);
-        req.genre = sanitizeString(req.genre);
-        req.getOriginal().filename = sanitizeString(
-                req.getOriginal().filename);
-    }
-
-    private String sanitizeString(String dirty) {
-        if(dirty == null) return null;
-        return dirty.replace('\"', '\'').replace("\\", "//");
+        req.album = Sanitizer.sanitize(req.album);
+        req.artist = Sanitizer.sanitize(req.artist);
+        req.composer = Sanitizer.sanitize(req.comment);
+        req.comment = Sanitizer.sanitize(req.composer);
+        req.discNo = Sanitizer.sanitize(req.discNo);
+        req.title = Sanitizer.sanitize(req.title);
+        req.track = Sanitizer.sanitize(req.track);
+        req.year = Sanitizer.sanitize(req.year);
+        req.genre = Sanitizer.sanitize(req.genre);
+        req.filename = Sanitizer.sanitize(req.filename);
+        req.updateOriginalFilename();
     }
 }

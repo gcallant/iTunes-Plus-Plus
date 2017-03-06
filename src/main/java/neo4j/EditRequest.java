@@ -82,6 +82,16 @@ public class EditRequest {
         }
     }
 
+    /**
+     * Updates old filename to the current version. Used
+     * in cases where the filename has to be a specific
+     * format and the old node is called to remove
+     * stale information.
+     */
+    public void updateOriginalFilename(){
+        original.filename = filename;
+    }
+
     private void sync(){
         album = original.album;
         artist = original.artist;
@@ -94,5 +104,4 @@ public class EditRequest {
         genre = original.genre;
         filename = original.filename;
     }
-
 }

@@ -34,22 +34,51 @@ public class Deleter {
         _session.run(clearAll);
     }
 
-    public void delete(List<String> IDs){
+    public void deleteByID(List<String> IDs){
         for(String s : IDs){
-            delete(s);
+            deleteByID(s);
         }
+    }
+
+    public void deleteSong(String songID){
+        Finder finder = new Finder(_session);
+        String artistID = finder.findIDByRelationship(
+                Label.SONGNAME,songID,Relation.HAS_ARTIST
+        );
+        String albumID = finder.findIDByRelationship(
+                Label.SONGNAME,songID,Relation.HAS_ALBUM
+        );
+        String genreID = finder.findIDByRelationship(
+                Label.SONGNAME,songID,Relation.HAS_GENRE
+        );
+
+        deleteByID(songID);
+        if(artistID != null) deleteOnEmpty(artistID);
+        if(albumID != null) deleteOnEmpty(albumID);
+        if(genreID != null) deleteOnEmpty(genreID);
+    }
+
+    public void deleteByID(String ID){
+        String query = "MATCH (n) WHERE id(n)="+ID+" DETACH DELETE n";
+        _session.run(query);
+    }
+
+    public void deleteByProperty(String label, PropertySet set){
+        Finder finder = new Finder(_session);
+        String ID = finder.findIDByProperty(label, set);
+        deleteByID(ID);
     }
 
     //deletes node IF there are no relations to it
     void deleteOnEmpty(String ID){
         if(!hasSongs(ID)){
-            delete(ID);
+            deleteByID(ID);
         }
     }
 
     void deleteSongOnEmpty(String ID){
         if(!hasRelationships(ID)){
-            delete(ID);
+            deleteByID(ID);
         }
     }
 
@@ -63,12 +92,6 @@ public class Deleter {
 //-----------------------------------------------------------------------------
 // PRIVATE METHODS
 //-----------------------------------------------------------------------------
-    private void delete(String ID){
-        String query = "MATCH (n) WHERE id(n)="+ID+" DETACH DELETE n";
-
-        _session.run(query);
-    }
-
     private boolean hasRelationships(String ID){
         int relCnt;
         String query = "MATCH (n)-[r]-(a) WHERE id(n)="+ID+" RETURN COUNT(r)";
@@ -91,6 +114,4 @@ public class Deleter {
 
         return (songCnt > 0);
     }
-
-
 }
