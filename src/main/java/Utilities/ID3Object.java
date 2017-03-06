@@ -63,7 +63,7 @@ public class ID3Object {
 		String album = null;
 		try{
 			album = _tag.getFirst(FieldKey.ALBUM);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return album;
 	}
@@ -86,7 +86,7 @@ public class ID3Object {
 		String artist = null;
 		try{
 			artist = _tag.getFirst(FieldKey.ARTIST);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return artist;
 	}
@@ -95,7 +95,7 @@ public class ID3Object {
 		String comment = null;
 		try{
 			comment = _tag.getFirst(FieldKey.COMMENT);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return comment;
 	}
@@ -104,7 +104,7 @@ public class ID3Object {
 		String composer = null;
 		try{
 			composer = _tag.getFirst(FieldKey.COMPOSER);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return composer;
 	}
@@ -113,7 +113,7 @@ public class ID3Object {
 		String discNo = null;
 		try{
 			discNo = _tag.getFirst(FieldKey.DISC_NO);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return discNo;
 	}
@@ -126,7 +126,7 @@ public class ID3Object {
 		String genre = null;
 		try{
 			genre = _tag.getFirst(FieldKey.GENRE);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 
 		return genre;
 	}
@@ -135,7 +135,7 @@ public class ID3Object {
 		String title = null;
 		try{
 			title = _tag.getFirst(FieldKey.TITLE);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return title;
 	}
@@ -144,7 +144,7 @@ public class ID3Object {
 		String track = null;
 		try{
 			track = _tag.getFirst(FieldKey.TRACK);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return track;
 	}
@@ -153,7 +153,7 @@ public class ID3Object {
 		String year = null;
 		try{
 			year = _tag.getFirst(FieldKey.YEAR);
-		} catch(KeyNotFoundException e){}
+		} catch(KeyNotFoundException | NullPointerException e){}
 		
 		return year;
 	}

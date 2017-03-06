@@ -1,5 +1,6 @@
 package Values;
 
+import Utilities.Sanitizer;
 import neo4j.EditRequest;
 
 import java.util.LinkedList;
@@ -16,7 +17,7 @@ public class PropertySet{
 
     public PropertySet(String prop, String val){
         this.prop = prop;
-        this.val = val;
+        this.val = Sanitizer.sanitize(val);
     }
 
     /**

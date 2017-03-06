@@ -43,7 +43,18 @@ public class Importer {
 
         ArrayList<String> filePaths = new ArrayList<>();
         ArrayList<ID3Object> id3s = new ArrayList<>();
-        fileExtensions.parallelStream().forEach(E -> addFolderRecursively(root, E));
+        //fileExtensions.parallelStream().forEach(E -> addFolderRecursively(root, E));
+        /*
+        This happens...
+        Caused by: org.neo4j.driver.v1.exceptions.ClientException: You are using a
+        session from multiple locations at the same time, which is not supported.
+        If you want to use multiple threads, you should ensure that each session is
+        used by only one thread at a time. One way to do that is to give each thread
+        its own dedicated session.
+         */
+        for(String e : fileExtensions){
+            addFolderRecursively(root, e);
+        }
         addSongs(filePaths, id3s);
     }
 
@@ -73,7 +84,6 @@ public class Importer {
         int i = 0;
         for (String songPath : songPaths)
             addSong(songPath, id3s.get(i++));
-        _songCnt += i;
     }
 
     public int getSongCount() {
@@ -89,7 +99,28 @@ public class Importer {
      * @return - clean string
      */
     private String sanitizeString(String dirty) {
+        if(dirty == null)
+            return null;
         return dirty.replace('\"', '\'').replace("\\", "//");
+    }
+
+    /**
+     * Creates a node if it does not already exist.
+     * @param label
+     * @param prop
+     * @param val
+     * @return  True if a node is created or already exists.
+     */
+    public boolean createIfNotExists(String label, String prop, String val){
+        if (!nodeExists(label, prop, val) && val != null){
+            if(!val.trim().equals("")){
+                createNode(label,prop,val);
+                return true;
+            }
+        } else if(val != null){
+            return true;
+        }
+        return false;
     }
 
     public void createNode(String... triples) {
@@ -117,6 +148,8 @@ public class Importer {
      */
     public void addSong(String songPath, ID3Object id3) {
 
+        boolean artistExists, albumExists, genreExists;
+
         String album = sanitizeString(id3.getAlbum());
         String artist = sanitizeString(id3.getArtist());
         String composer = sanitizeString(id3.getComposer());
@@ -129,13 +162,8 @@ public class Importer {
         String fileName = sanitizeString(songPath);
 
 
-        // import artist info //////////
-        if (!nodeExists(Label.ARTIST, Property.ARTIST_NAME, artist))
-            createNode(Label.ARTIST,
-                    Property.ARTIST_NAME, artist);
-
         // import song info  /////////
-        if (!nodeExists(Label.SONGNAME, Property.SONG_NAME, songName))
+        if (!nodeExists(Label.SONGNAME, Property.FILENAME, fileName)) {
             createNode(Label.SONGNAME,
                     Property.SONG_NAME, songName,
                     Property.TRACK_NUM, track,
@@ -144,84 +172,93 @@ public class Importer {
                     Property.YEAR, year,
                     Property.COMPOSER_NAME, composer,
                     Property.FILENAME, fileName);
+            _songCnt++;
+        }
+        // import artist info //////////
+        artistExists = createIfNotExists(Label.ARTIST,Property.ARTIST_NAME,artist);
 
         ///////// import album info ///////////////
-        if (!nodeExists(Label.ALBUM, Property.ALBUM_NAME, album))
-            createNode(Label.ALBUM,
-                    Property.ALBUM_NAME, album,
-                    Property.YEAR, year);
+        albumExists = createIfNotExists(Label.ALBUM,Property.ALBUM_NAME,album);
 
         ////////// import genre info ////////////////
-        if (!nodeExists(Label.GENRE, Property.GENRE_NAME, genre))
-            createNode(Label.GENRE,
-                    Property.GENRE_NAME, genre);
+        genreExists = createIfNotExists(Label.GENRE,Property.GENRE_NAME,genre);
 
         // create relationship ARTIST/GENRE
-        if(!relationshipExists(
-                Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_ARTIST,
-                Label.ARTIST, Property.ARTIST_NAME, artist
-        ))
-            createRelationshipReciprocal(
+        if(artistExists && genreExists) {
+            if (!relationshipExists(
                     Label.GENRE, Property.GENRE_NAME, genre,
                     Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, artist,
-                    Relation.HAS_GENRE
-            );
-
+                    Label.ARTIST, Property.ARTIST_NAME, artist)
+            )
+                createRelationshipReciprocal(
+                        Label.GENRE, Property.GENRE_NAME, genre,
+                        Relation.HAS_ARTIST,
+                        Label.ARTIST, Property.ARTIST_NAME, artist,
+                        Relation.HAS_GENRE
+                );
+        }
         // create relationship SONG/GENRE
-        if(!relationshipExists(
-                Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_SONG,
-                Label.SONGNAME, Property.SONG_NAME, songName
-        ))
-            createRelationshipReciprocal(
+        if(genreExists) {
+            if (!relationshipExists(
                     Label.GENRE, Property.GENRE_NAME, genre,
                     Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, songName,
-                    Relation.HAS_GENRE
-            );
-
+                    Label.SONGNAME, Property.SONG_NAME, songName)
+            )
+                createRelationshipReciprocal(
+                        Label.GENRE, Property.GENRE_NAME, genre,
+                        Relation.HAS_SONG,
+                        Label.SONGNAME, Property.SONG_NAME, songName,
+                        Relation.HAS_GENRE
+                );
+        }
         // create relationship ALBUM/GENRE
-        if(!relationshipExists(
-                Label.GENRE, Property.GENRE_NAME, genre,
-                Relation.HAS_ALBUM,
-                Label.ALBUM, Property.ALBUM_NAME, album
-        ))
-            createRelationshipReciprocal(
+        if(albumExists && genreExists) {
+            if (!relationshipExists(
                     Label.GENRE, Property.GENRE_NAME, genre,
                     Relation.HAS_ALBUM,
-                    Label.ALBUM, Property.ALBUM_NAME, album,
-                    Relation.HAS_GENRE
-            );
-
+                    Label.ALBUM, Property.ALBUM_NAME, album)
+            )
+                createRelationshipReciprocal(
+                        Label.GENRE, Property.GENRE_NAME, genre,
+                        Relation.HAS_ALBUM,
+                        Label.ALBUM, Property.ALBUM_NAME, album,
+                        Relation.HAS_GENRE
+                );
+        }
         // create relationship ARTIST/SONG
-        if (!relationshipExists(
-                Label.ARTIST, Property.ARTIST_NAME, artist,
-                Relation.HAS_SONG,
-                Label.SONGNAME, Property.SONG_NAME, songName))
-            createRelationshipReciprocal(
+        if(artistExists) {
+            if (!relationshipExists(
                     Label.ARTIST, Property.ARTIST_NAME, artist,
                     Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, songName,
-                    Relation.HAS_ARTIST);
-
+                    Label.SONGNAME, Property.SONG_NAME, songName)
+             )
+                createRelationshipReciprocal(
+                        Label.ARTIST, Property.ARTIST_NAME, artist,
+                        Relation.HAS_SONG,
+                        Label.SONGNAME, Property.SONG_NAME, songName,
+                        Relation.HAS_ARTIST);
+        }
         // create relationship ALBUM/ARTIST
-        if (!relationshipExists(
-                Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                Label.ARTIST, Property.ARTIST_NAME, artist))
-            createRelationshipReciprocal(
+        if(albumExists && artistExists) {
+            if (!relationshipExists(
                     Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, artist, Relation.HAS_ALBUM);
-
+                    Label.ARTIST, Property.ARTIST_NAME, artist)
+            )
+                createRelationshipReciprocal(
+                        Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
+                        Label.ARTIST, Property.ARTIST_NAME, artist, Relation.HAS_ALBUM);
+        }
         // create relationship ALBUM/SONG
-        if (!relationshipExists(
-                Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
-                Label.SONGNAME, Property.SONG_NAME, songName))
-            createRelationshipReciprocal(
+        if(albumExists) {
+            if (!relationshipExists(
                     Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, songName, Relation.HAS_ALBUM
-            );
+                    Label.SONGNAME, Property.SONG_NAME, songName)
+            )
+                createRelationshipReciprocal(
+                        Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
+                        Label.SONGNAME, Property.SONG_NAME, songName, Relation.HAS_ALBUM
+                );
+        }
     }
 
     /**
