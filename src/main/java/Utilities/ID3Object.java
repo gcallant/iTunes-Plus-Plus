@@ -1,32 +1,25 @@
 package Utilities;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.logging.Filter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-
 import Values.Property;
-import com.sun.xml.internal.bind.v2.model.core.ID;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
-//import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.CannotWriteException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.FieldDataInvalidException;
-import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.KeyNotFoundException;
-import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.TagField;
+import org.jaudiotagger.tag.*;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+//import org.jaudiotagger.audio.AudioHeader;
 
 public class ID3Object {
 	private AudioFile _afile;
@@ -44,6 +37,8 @@ public class ID3Object {
 
 	public static ID3Object findBySongID(Session session, String songID)
 	throws IOException{
+
+		Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
 		StringBuilder query = new StringBuilder();
 
 		query.append("MATCH (n) WHERE ID(n)=").append(songID).append(" ");
