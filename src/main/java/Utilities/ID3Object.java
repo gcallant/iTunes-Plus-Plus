@@ -26,6 +26,7 @@ public class ID3Object {
 	private Tag _tag;
 	
 	public ID3Object(File mediaFile) throws IOException {
+      Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
 		try {
 			_afile = AudioFileIO.read(mediaFile);
 		} catch (CannotReadException | IOException | TagException | ReadOnlyFileException
@@ -37,8 +38,6 @@ public class ID3Object {
 
 	public static ID3Object findBySongID(Session session, String songID)
 	throws IOException{
-
-		Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
 		StringBuilder query = new StringBuilder();
 
 		query.append("MATCH (n) WHERE ID(n)=").append(songID).append(" ");
