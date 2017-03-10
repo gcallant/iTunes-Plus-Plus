@@ -2,7 +2,7 @@ package Utilities;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -39,7 +39,7 @@ public class FileHandler {
      * @param songPaths - empty list to add paths
      * @param id3s - empty list to add ID3's
      */
-    public static void getAllFilesAndID3s(File root, String type, ArrayList<String> songPaths, ArrayList<ID3Object> id3s){
+    public static void getAllFilesAndID3s(File root, String type, Collection<String> songPaths, Collection<ID3Object> id3s){
 
         if(root.isDirectory())
             for(File file : root.listFiles())
