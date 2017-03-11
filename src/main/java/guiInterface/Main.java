@@ -8,6 +8,9 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Main extends Application
 {
    public static void main(String[] args)
@@ -19,7 +22,7 @@ public class Main extends Application
    public void start(Stage primaryStage) throws Exception
    {
       Parent root = FXMLLoader.load(getClass().getResource("/itunes++.fxml"));
-      
+
       Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
 
       primaryStage.setTitle("iTunes++");

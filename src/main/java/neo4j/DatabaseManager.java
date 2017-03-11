@@ -48,7 +48,7 @@ public class DatabaseManager
       }
       else
       {
-         Controller.showAlert("Oh no! An error occurred!", "Couldn't establish neo4J instance", Alert.AlertType.ERROR);
+         log4JLogger.warn("Connection failed to {}", databaseConnector);
       }
    }
 

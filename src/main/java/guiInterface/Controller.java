@@ -2,6 +2,7 @@ package guiInterface;
 
 import Values.*;
 import Values.Label;
+
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,18 +18,18 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
 import neo4j.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-public class Controller
-{
+public class Controller {
+//-----------------------------------------------------------------------------
+//PARAMETERS
+//-----------------------------------------------------------------------------
     private int curTrack = -1;
     private String prevSearch;
     private DatabaseManager dbm = DatabaseManager.getInstance();
@@ -37,30 +38,35 @@ public class Controller
     private Deleter deleter = new Deleter(dbm.getDatabaseConnector());
     private SearchQuery query = new SearchQuery(dbm.getDatabaseConnector());
 
-//    private final String[] SUPPORTED_EXT = {".mp3",".mp4",".wmv",".mpeg", ".aac",
-//                                            ".pcm", ".aif", ".aiff", ".flv", ".fxm",
-//                                            ".wav", ".m4a", ".m4v", ".m4p", ".m4r", ".3gp"};
-    private final String[] SUPPORTED_EXT = {//based on Jaudiotagger support
-        ".mp3",".mp4",".m4a",".m4p",".sb0",".flac",".wav",".rm",".ra"
+    /*
+        JavaFX media support:
+        MP3;
+        AIFF containing uncompressed PCM;
+        WAV containing uncompressed PCM;
+        MPEG-4 multimedia container with Advanced Audio Coding (AAC) audio
+
+        JaudioTagger media support:
+        It currently fully supports Mp3, Mp4 (Mp4 audio, M4a and M4p audio)
+        Ogg Vorbis, Flac and Wma, there is limited support for Wav and Real formats.
+     */
+
+    private final String[] SUPPORTED_EXT = {
+        ".mp3",".m4a",".wav"
     };
 
-    @FXML
-    private MediaControl mediaControl;
-    @FXML
-    private MenuBar menuBar;
-    @FXML
-    private TableView<Music> tViewSongList;
-    @FXML
-    private TextField searchBar;
+    @FXML private javafx.scene.control.Label labelLastOp;
+    @FXML private javafx.scene.control.Label labelSongsFound;
+    @FXML private javafx.scene.control.Label labelTimeExe;
+    @FXML private MediaControl mediaControl;
+    @FXML private MenuBar menuBar;
+    @FXML private TableView<Music> tViewSongList;
+    @FXML private TextField searchBar;
 
-    public static void showAlert(String header, String message, Alert.AlertType alertType)
-    {
-        Alert alert = new Alert(alertType);
-        alert.setHeaderText(header);
-        alert.setContentText(message);
-        alert.show();
-    }
-
+//-----------------------------------------------------------------------------
+//HANDLER METHODS
+//-----------------------------------------------------------------------------
+    // MEDIA PLAYER------------------------------------------------------------
+    //-------------------------------------------------------------------------
     @FXML protected void handleBtnPlay(MouseEvent event)
     {
         if(curTrack < 0) return;
@@ -71,37 +77,13 @@ public class Controller
         mediaControl.play();
     }
 
-    @FXML protected void handleBtnNext(MouseEvent event)
-    {
-        if(curTrack < 0) return;
-        incrementCurrentTrack();
-        handleBtnPlay(event);
-    }
-
-    @FXML
-    protected void handleSearchBar(KeyEvent keyEvent)
-    {
-        if(keyEvent.getCode().equals(KeyCode.ENTER))
-        {
-            curTrack = -1;
-            String searchValue = searchBar.getText();
-            prevSearch = searchValue;
-            List<Music> list = query.search(searchValue);
-           
-           showResults((ObservableList<Music>) list);
-        }
-    }
-
-    @FXML
-    protected void handleTableView(MouseEvent event){
-        curTrack = tViewSongList.getSelectionModel().getSelectedIndex();
-    }
-
     @FXML protected void handleBtnPause(MouseEvent event){
+        if(curTrack < 0) return;
         mediaControl.pause();
     }
 
     @FXML protected void handleBtnStop(MouseEvent event){
+        if(curTrack < 0) return;
         mediaControl.stop();
     }
 
@@ -112,6 +94,15 @@ public class Controller
         handleBtnPlay(event);
     }
 
+    @FXML protected void handleBtnNext(MouseEvent event)
+    {
+        if(curTrack < 0) return;
+        incrementCurrentTrack();
+        handleBtnPlay(event);
+    }
+
+    //MENU ITEMS---------------------------------------------------------------
+    //-------------------------------------------------------------------------
     @FXML protected void handleMenuItemAbout(ActionEvent event)
     {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -140,7 +131,11 @@ public class Controller
         alert.initOwner(getPrimaryStage());
         Optional<ButtonType> result = alert.showAndWait();
         if(result.get() == ButtonType.OK){
+            long startTime = System.currentTimeMillis();
             deleter.cleanDatabase();
+            refreshResults();
+            double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
+            updateInfo("Clear All", totalTime);
         }
     }
 
@@ -157,10 +152,14 @@ public class Controller
 
         long startTime = System.currentTimeMillis();
 
-        importer.addFolderRecursively(rootDir.getAbsolutePath(),
-                new ArrayList<>(Arrays.asList(SUPPORTED_EXT)));
-
-        double totalTime = (System.currentTimeMillis() - startTime)/1000;
+        try {
+            importer.addFolderRecursively(rootDir.getAbsolutePath(),
+                    new ArrayList<>(Arrays.asList(SUPPORTED_EXT)));
+        }catch(Exception e){
+            System.err.println("UNABLE TO COMPLETE IMPORT!!");
+            e.printStackTrace();
+        }
+        double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
         DecimalFormat df = new DecimalFormat("#.###");
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -173,6 +172,7 @@ public class Controller
         alert.setContentText("Process took "+df.format(totalTime)+" sec");
         alert.initOwner(getPrimaryStage());
         alert.show();
+        updateInfo("Import", totalTime);
     }
 
     @FXML protected void handleMenuItemDelete(ActionEvent event)
@@ -181,6 +181,7 @@ public class Controller
             noSelection("Delete Song");
             return;
         }
+        long startTime = 0;
         Music song = getSelectedMusic();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete");
@@ -191,10 +192,13 @@ public class Controller
         alert.initOwner(getPrimaryStage());
         Optional<ButtonType> result = alert.showAndWait();
         if(result.get() == ButtonType.OK){
+            startTime = System.currentTimeMillis();
             Finder finder = new Finder(dbm.getDatabaseConnector());
             String songID = finder.findIDByProperty(Label.SONGNAME,
                 new PropertySet(Property.FILENAME,song.getFilePath()));
             deleter.deleteSong(songID);
+            double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
+            updateInfo("Delete", totalTime);
         }
 
         refreshResults();
@@ -208,7 +212,7 @@ public class Controller
         }
         String song = getSelectedSongPath();
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("itunes++_edit.fxml"));
-        ControllerEdit controller = new ControllerEdit(editor);
+        ControllerEdit controller = new ControllerEdit(editor, this);
         loader.setController(controller);
         Stage stage = new Stage(StageStyle.DECORATED);
         try{
@@ -226,17 +230,45 @@ public class Controller
         stage.setTitle("ITunes++ Song Editor");
         stage.initOwner(getPrimaryStage());
         stage.show();
-        refreshResults();
+    }
+
+    //SEARCHING----------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    @FXML protected void handleTableView(MouseEvent event){
+        curTrack = tViewSongList.getSelectionModel().getSelectedIndex();
+    }
+
+    @FXML protected void handleSearchBar(KeyEvent keyEvent)
+    {
+        if(keyEvent.getCode().equals(KeyCode.ENTER))
+        {
+            curTrack = -1;
+            String searchValue = searchBar.getText();
+            prevSearch = searchValue;
+            long startTime = System.currentTimeMillis();
+            List<Music> list = query.search(searchValue);
+            showResults((ObservableList<Music>) list);
+            double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
+            updateInfo("Search", totalTime);
+        }
     }
 
 //-----------------------------------------------------------------------------
-// NON-GUI METHODS
+// PACKAGE METHODS
 //-----------------------------------------------------------------------------
-    public void playNextSong(){
+    void playNextSong(){
         handleBtnNext(null);
         handleBtnPlay(null);
     }
 
+    void setEditTime(double time){
+        refreshResults();
+        updateInfo("Edit", time);
+    }
+
+//-----------------------------------------------------------------------------
+// PRIVATE METHODS
+//-----------------------------------------------------------------------------
     private void noSelection(String title){
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
@@ -244,6 +276,10 @@ public class Controller
         alert.setContentText("Please select a song and try again.");
         alert.initOwner(getPrimaryStage());
         alert.show();
+    }
+
+    private int getSongCount(){
+        return tViewSongList.getItems().size();
     }
 
     private Stage getPrimaryStage(){
@@ -310,5 +346,20 @@ public class Controller
         tViewSongList.getColumns().clear();
         initTable();
         tViewSongList.setItems(list);
+    }
+
+    private void updateInfo(String operation, double sec){
+        DecimalFormat df = new DecimalFormat("#.###");
+        labelLastOp.setText("Last Operation: "+operation);
+        labelSongsFound.setText("Showing "+getSongCount()+" songs");
+        labelTimeExe.setText("Execution Time: "+df.format(sec)+" sec");
+    }
+
+    public static void showAlert(String header, String message, Alert.AlertType alertType)
+    {
+        Alert alert = new Alert(alertType);
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+        alert.show();
     }
 }
