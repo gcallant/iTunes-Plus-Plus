@@ -39,6 +39,7 @@
                 </Menu>
             </menus>
         </MenuBar>
+        <!--Media Control Buttons-->
         <HBox id="hbox_buttons" alignment="CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100" prefWidth="${screen.visualBounds.width}">
             <children>
                 <ImageView id="btn_prev" fitHeight="100" fitWidth="200.0" onMouseClicked="#handleBtnPrev" pickOnBounds="true" preserveRatio="true">
@@ -71,7 +72,9 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </VBox.margin>
         </HBox>
-        <MediaControl fx:id="mediaControl" />
+        <!--Slider-->
+        <guiInterface.MediaControl fx:id="mediaControl" />
+        <!--Search Bar-->
         <TextField id="searchBar" fx:id="searchBar" alignment="CENTER" prefHeight="39.0" onKeyPressed="#handleSearchBar" prefWidth="598.0" promptText="Enter song name, artist name or genre to search">
             <font>
                 <Font size="18.0" />
@@ -80,15 +83,42 @@
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </VBox.margin>
         </TextField>
-        <ScrollPane id="scroll_list_items" fitToHeight="true" fitToWidth="true" prefHeight="450.0" prefWidth="600.0">
+        <!--Song List-->
+        <ScrollPane id="scroll_list_items" fitToHeight="true" fitToWidth="true" prefHeight="450.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
             <VBox.margin>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </VBox.margin>
             <content>
-                <TableView id="table_view_item_list" fx:id="tViewSongList" onMouseClicked="#handleTableView" prefHeight="200.0" prefWidth="200.0">
-                   
-                </TableView>
+                <TableView id="table_view_item_list" fx:id="tViewSongList" onMouseClicked="#handleTableView" prefHeight="200.0" prefWidth="200.0" />
             </content>
         </ScrollPane>
+        <!--Information-->
+        <HBox prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <VBox alignment="TOP_LEFT" prefHeight="200.0" prefWidth="200.0">
+                    <children>
+                        <Label id="label_last_op" fx:id="labelLastOp" text="Last Operation:" />
+                    </children>
+                    <HBox.margin>
+                        <Insets />
+                    </HBox.margin>
+                </VBox>
+                <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="200.0">
+                    <children>
+                        <Label id="label_song_num" fx:id="labelSongsFound" alignment="CENTER" contentDisplay="CENTER" textAlignment="CENTER" text="Showing 0 songs" />
+                    </children>
+                </VBox>
+                <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                <VBox alignment="TOP_RIGHT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="200.0" prefWidth="200.0">
+                    <children>
+                        <Label id="label_time_exe" fx:id="labelTimeExe" alignment="CENTER_RIGHT" nodeOrientation="LEFT_TO_RIGHT" text="Execution Time:" />
+                    </children>
+                </VBox>
+            </children>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+        </HBox>
     </children>
 </VBox>

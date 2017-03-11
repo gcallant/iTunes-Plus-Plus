@@ -13,6 +13,7 @@ import neo4j.Editor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * Created by Ryan on 2/25/2017.
@@ -20,6 +21,7 @@ import java.io.IOException;
  * It is called by the Controller class.
  */
 public class ControllerEdit {
+    private Controller parent;
     private Editor editor;
     private EditRequest editRequest;
     private ID3Object id3;
@@ -45,7 +47,10 @@ public class ControllerEdit {
     @FXML
     private Button cancel;
 
-    ControllerEdit(Editor editor){ this.editor = editor; }
+    ControllerEdit(Editor editor, Controller parent){
+        this.editor = editor;
+        this.parent = parent;
+    }
 
     /**
      * Checks to see if a change has occurred and sends changes as
@@ -65,8 +70,11 @@ public class ControllerEdit {
         editRequest.track = track.getText();
         editRequest.year = year.getText();
 
+        long startTime = System.currentTimeMillis();
         editor.edit(editRequest, id3);
+        double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
 
+        parent.setEditTime(totalTime);
         handleBtnCancel(event);
     }
 

@@ -33,6 +33,8 @@ public class ID3Object {
 	private Tag _tag;
 	
 	public ID3Object(File mediaFile) throws IOException {
+		Logger.getLogger("org.jaudiotagger").setUseParentHandlers(false);
+		Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
 		try {
 			_afile = AudioFileIO.read(mediaFile);
 		} catch (CannotReadException | IOException | TagException | ReadOnlyFileException
