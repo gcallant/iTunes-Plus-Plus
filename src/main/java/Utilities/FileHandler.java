@@ -1,5 +1,7 @@
 package Utilities;
 
+import Values.Extensions;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -35,35 +37,51 @@ public class FileHandler {
      * Get all file paths and associated ID3 tags using recursive folder search
      *
      * @param root - the root directory
-     * @param type - file type to search for
      * @param songPaths - empty list to add paths
-     * @param id3s - empty list to add ID3's
      */
-    public static void getAllFilesAndID3s(File root, String type, Collection<String> songPaths, Collection<ID3Object> id3s){
+    public static void getAllMusicFiles(File root, SharedQueue<String> songPaths){
 
-        if(root.isDirectory())
-            for(File file : root.listFiles())
-                getAllFilesAndID3s(file, type, songPaths, id3s);
+        if(root.isDirectory()){
+            for(File file : root.listFiles()) {
+                getAllMusicFiles(file, songPaths);
+            }
+            return;
+        }
 
-        else if(root.isFile() && root.getName().endsWith(type)) {
-            try{
-                ID3Object id3 = getID3fromFile(root);
-                id3s.add(id3);
-                songPaths.add(root.getAbsolutePath());
-            } catch(IOException e){
-                System.err.println(e.getLocalizedMessage());
+        for(String ext : Extensions.SUPPORTED) {
+            String filepath = root.getAbsolutePath();
+            if (filepath.endsWith(ext)) {
+                songPaths.enqueue(filepath);
+                break;
             }
         }
     }
 
+    public static int getMusicFileCount(File root){
+        return getMusicFileCount(root, 0);
+    }
+
     /**
-     * Gets an ID3object from given songFile
+     * Get media file count
      *
-     * @param songFile - song file pointer
-     * @return - the ID3Object
+     * @param root - the root directory
+     * @param count - the number of files, starts at zero
      */
-    private static ID3Object getID3fromFile(File songFile)throws IOException{
-        ID3Object id3 = new ID3Object(songFile);
-        return id3;
+    private static int getMusicFileCount(File root, int count) {
+
+        if (root.isDirectory()) {
+            for (File file : root.listFiles()) {
+                for (String ext : Extensions.SUPPORTED) {
+                    String filepath = root.getName();
+                    if (filepath.endsWith(ext)) {
+                        return getMusicFileCount(root, ++count);
+                    }
+                }
+
+                return getMusicFileCount(file, count);
+            }
+        }
+
+        return count;
     }
 }

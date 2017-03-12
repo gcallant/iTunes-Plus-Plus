@@ -66,85 +66,6 @@ public class Editor {
 //-----------------------------------------------------------------------------
 // PRIVATE METHODS
 //-----------------------------------------------------------------------------
-    private void createRelationships(Importer importer, EditRequest req,
-        boolean artistExists, boolean albumExists, boolean genreExists){
-        // create relationship ARTIST/GENRE
-        if(artistExists && genreExists) {
-            if (!importer.relationshipExists(
-                    Label.GENRE, Property.GENRE_NAME, req.genre,
-                    Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, req.artist)
-                    )
-                importer.createRelationshipReciprocal(
-                        Label.GENRE, Property.GENRE_NAME, req.genre,
-                        Relation.HAS_ARTIST,
-                        Label.ARTIST, Property.ARTIST_NAME, req.artist,
-                        Relation.HAS_GENRE
-                );
-        }
-        // create relationship SONG/GENRE
-        if(genreExists) {
-            if (!importer.relationshipExists(
-                    Label.GENRE, Property.GENRE_NAME, req.genre,
-                    Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, req.title)
-                    )
-                importer.createRelationshipReciprocal(
-                        Label.GENRE, Property.GENRE_NAME, req.genre,
-                        Relation.HAS_SONG,
-                        Label.SONGNAME, Property.SONG_NAME, req.title,
-                        Relation.HAS_GENRE
-                );
-        }
-        // create relationship ALBUM/GENRE
-        if(albumExists && genreExists) {
-            if (!importer.relationshipExists(
-                    Label.GENRE, Property.GENRE_NAME, req.genre,
-                    Relation.HAS_ALBUM,
-                    Label.ALBUM, Property.ALBUM_NAME, req.album)
-                    )
-                importer.createRelationshipReciprocal(
-                        Label.GENRE, Property.GENRE_NAME, req.genre,
-                        Relation.HAS_ALBUM,
-                        Label.ALBUM, Property.ALBUM_NAME, req.album,
-                        Relation.HAS_GENRE
-                );
-        }
-        // create relationship ARTIST/SONG
-        if(artistExists) {
-            if (!importer.relationshipExists(
-                    Label.ARTIST, Property.ARTIST_NAME, req.artist,
-                    Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, req.title)
-                    )
-                importer.createRelationshipReciprocal(
-                        Label.ARTIST, Property.ARTIST_NAME, req.artist,
-                        Relation.HAS_SONG,
-                        Label.SONGNAME, Property.SONG_NAME, req.title,
-                        Relation.HAS_ARTIST);
-        }
-        // create relationship ALBUM/ARTIST
-        if(albumExists && artistExists) {
-            if (!importer.relationshipExists(
-                    Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, req.artist)
-                    )
-                importer.createRelationshipReciprocal(
-                        Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_ARTIST,
-                        Label.ARTIST, Property.ARTIST_NAME, req.artist, Relation.HAS_ALBUM);
-        }
-        // create relationship ALBUM/SONG
-        if(albumExists) {
-            if (!importer.relationshipExists(
-                    Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, req.title)
-                    )
-                importer.createRelationshipReciprocal(
-                        Label.ALBUM, Property.ALBUM_NAME, req.album, Relation.HAS_SONG,
-                        Label.SONGNAME, Property.SONG_NAME, req.title, Relation.HAS_ALBUM
-                );
-        }
-    }
 
     private void updateID3(EditRequest req, ID3Object id3){
         id3.setAlbum(req.album);
@@ -170,13 +91,13 @@ public class Editor {
      */
     private void delOldNodes(EditRequest req){
         Deleter deleter = new Deleter(_session);
-        String songID = _finder.findIDByProperty(Label.SONGNAME,
+        int songID = _finder.findIDByProperty(Label.SONGNAME,
                 new PropertySet(Property.FILENAME, req.filename));
-        String albumID = _finder.findIDByProperty(Label.ALBUM,
+        int albumID = _finder.findIDByProperty(Label.ALBUM,
                 new PropertySet(Property.ALBUM_NAME, req.album));
-        String artistID = _finder.findIDByProperty(Label.ARTIST,
+        int artistID = _finder.findIDByProperty(Label.ARTIST,
                 new PropertySet(Property.ARTIST_NAME, req.artist));
-        String genreID = _finder.findIDByProperty(Label.GENRE,
+        int genreID = _finder.findIDByProperty(Label.GENRE,
                 new PropertySet(Property.GENRE_NAME, req.genre));
 
         deleter.deleteSongOnEmpty(songID);
@@ -191,13 +112,12 @@ public class Editor {
      * @param req The values for the fields to change
      */
     private void updateDB(EditRequest req) {
-        EditRequest original = req.getOriginal();
         Deleter deleter = new Deleter(_session);
         Importer importer = new Importer(_session);
-        String songID = _finder.findIDByProperty(Label.SONGNAME,
+        int songID = _finder.findIDByProperty(Label.SONGNAME,
                 new PropertySet(Property.FILENAME, req.filename));
 
-        boolean artistExists, albumExists, genreExists;
+        int artistID, albumID, genreID;
 
         // set song -----------------------------------------------------------
         LinkedList<PropertySet> songProperties =
@@ -205,35 +125,29 @@ public class Editor {
         setPropertyByID(songID, songProperties);
 
         // set artist ---------------------------------------------------------
-        artistExists = importer.createIfNotExists(
+        artistID = importer.createIfNotExists(_finder,
                 Label.ARTIST,Property.ARTIST_NAME,req.artist);
         if(!req.sameArtist()){
-            String artistID = _finder.findIDByProperty(Label.ARTIST,
-                    new PropertySet(Property.ARTIST_NAME, original.artist));
             deleter.deleteRelationship(songID, Label.SONGNAME, artistID, Label.ARTIST);
         }
 
         // set album ----------------------------------------------------------
-        albumExists = importer.createIfNotExists(
+        albumID = importer.createIfNotExists(_finder,
                 Label.ALBUM,Property.ALBUM_NAME,req.album);
         if(!req.sameAlbum()){
-            String albumID = _finder.findIDByProperty(Label.ALBUM,
-                    new PropertySet(Property.ALBUM_NAME, original.album));
             deleter.deleteRelationship(songID, Label.SONGNAME, albumID, Label.ALBUM);
         }
         // set genre ----------------------------------------------------------
-        genreExists = importer.createIfNotExists(
+        genreID = importer.createIfNotExists(_finder,
                 Label.GENRE,Property.GENRE_NAME,req.genre);
         if(!req.sameGenre()){
-            String genreID = _finder.findIDByProperty(Label.GENRE,
-                    new PropertySet(Property.GENRE_NAME, original.genre));
             deleter.deleteRelationship(songID, Label.SONGNAME, genreID, Label.GENRE);
         }
 
-        createRelationships(importer, req, artistExists, albumExists, genreExists);
+        importer.createAllRelationships(albumID, artistID, genreID, songID);
     }
 
-    private void setPropertyByID(String ID, List<PropertySet> sets){
+    private void setPropertyByID(int ID, List<PropertySet> sets){
         int sz = sets.size();
         StringBuilder query = new StringBuilder();
 

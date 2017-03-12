@@ -25,15 +25,9 @@ public class ImporterTest {
     public void addFolderRecursively() throws Exception {
 
         Importer importer = new Importer(_NEOCONNECTION.getDatabaseConnector());
-        ArrayList<String> songFiles = new ArrayList<>();
-        songFiles.add(".mp3");
-        songFiles.add(".mp4");
-        songFiles.add(".wmv");
-        songFiles.add(".mpeg");
-        songFiles.add(".m4p");
 
         AudioFileIO.logger.setLevel(Level.OFF);
-        importer.addFolderRecursively("E:\\Andre Kostelanetz, Andre Previn, Columbia Symphony Orchestra, Leonard Bernstein & New York Philharmonic", songFiles);
+        importer.addFolderRecursively("E:\\Andre Kostelanetz, Andre Previn, Columbia Symphony Orchestra, Leonard Bernstein & New York Philharmonic");
     }
 
 }
