@@ -2,19 +2,17 @@ package neo4j;
 
 import Utilities.FileHandler;
 import Utilities.ID3Object;
+import Utilities.Sanitizer;
+import Utilities.SharedQueue;
 import Values.Label;
 import Values.Property;
+import Values.PropertySet;
 import Values.Relation;
-import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 
 import java.io.File;
-import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
 
 import static org.neo4j.driver.v1.Values.parameters;
 
@@ -29,10 +27,7 @@ public class Importer
 {
 
    private int _songCount = 0;
-   private Session              _session;
-   private Vector<String>       filePaths;
-   private Vector<ID3Object> id3s;
-
+   private Session _session;
 
    public Importer(Session session)
    {
@@ -41,63 +36,50 @@ public class Importer
 
    /**
     * Retrieves all files from all folders recursively from given file root.
-    * Searches each time per file extension in list.
-    *
-    * @param root           - file path
-    * @param fileExtensions - list of file extensions to search
-    */
-   public void addFolderRecursively(String root, List<String> fileExtensions)
-   {
-
-
-      //fileExtensions.parallelStream().forEach(E -> addFolderRecursively(root, E));
-        /*
-        This happens...
-        Caused by: org.neo4j.driver.v1.exceptions.ClientException: You are using a
-        session from multiple locations at the same time, which is not supported.
-        If you want to use multiple threads, you should ensure that each session is
-        used by only one thread at a time. One way to do that is to give each thread
-        its own dedicated session.
-         */
-      for(String e : fileExtensions)
-      {
-         addFolderRecursively(root, e);
-      }
-      addSongs(filePaths, id3s);
-   }
-
-   /**
-    * Retrieves all files from all folders recursively from given file root.
     * Searches for file extension.
     *
-    * @param root          - file path
-    * @param fileExtension - file extension to search
-    */
-   public void addFolderRecursively(String root, String fileExtension)
-   {
-      filePaths = new Vector<>();
-      id3s = new Vector<>();
-      ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-      Runnable task = () ->  addSongs(filePaths, id3s);
-      executor.scheduleAtFixedRate(task, 3, 3, TimeUnit.SECONDS);
-      FileHandler.getAllFilesAndID3s(new File(root), fileExtension, filePaths, id3s);
-   }
-
-   /**
-    * Add all songs from list using id3s to the database.
+    * Note: May improve performance to use two queues - one to grab filepaths
+    * that are turned into ID3Objects, and one to grab ID3Objects and store
+    * them into database.
     *
-    * @param songPaths - list of song paths
-    * @param id3s      - list of id3 tags
+    * @param root          - file path
     */
-   private void addSongs(Vector<String> songPaths, Vector<ID3Object> id3s)
+   public void addFolderRecursively(String root)
    {
-      for(int i = 0; i < songPaths.size(); i++)
-      {
-         String songPath = songPaths.get(i);
-         ID3Object id3Object = id3s.get(i);
-         songPaths.remove(i);
-         id3s.remove(i);
-         addSong(songPath, id3Object);
+      SharedQueue<String> importList = new SharedQueue<>(10_000);
+
+      //Grabs all files that match supported media extensions and
+      //store them into importList
+      Thread fileGrabber = new Thread(new Runnable() {
+         @Override public void run() {
+            FileHandler.getAllMusicFiles(new File(root),importList);
+            importList.stop();
+         }
+      });
+      fileGrabber.start();
+
+      //Grabs all file paths from importList, create ID3Objects,
+      //and store into database
+      Thread dbImporter = new Thread(new Runnable() {
+         @Override public void run() {
+            while(!importList.isEmpty() || !importList.isStopped()){
+               String filepath = importList.dequeue();
+               try {
+                  ID3Object id3 = new ID3Object(new File(filepath));
+                  addSong(id3);
+               }catch(IOException e){
+                  System.err.println("Unable to create ID3Object from '"
+                          + filepath + "'");
+               }
+            }
+         }
+      });
+      dbImporter.start();
+
+      while(dbImporter.isAlive()) {
+         try {
+            dbImporter.join();
+         } catch (InterruptedException e){}
       }
    }
 
@@ -109,241 +91,153 @@ public class Importer
    }
 
    /**
-    * Sanitizes strings for database entry.
-    *
-    * @param dirty - the dirty string
-    * @return - clean string
-    */
-   private String sanitizeString(String dirty)
-   {
-      if(dirty == null)
-      { return null; }
-      return dirty.replace('\"', '\'').replace("\\", "//");
-   }
-
-   /**
     * Creates a node if it does not already exist.
     *
-    * @param label
-    * @param prop
-    * @param val
+    * @param label Node label
+    * @param prop Node property
+    * @param val Node value
     * @return True if a node is created or already exists.
     */
-   public boolean createIfNotExists(String label, String prop, String val)
+   public int createIfNotExists(Finder finder, String label, String prop, String val)
    {
-      if(! nodeExists(label, prop, val) && val != null)
-      {
-         if(! val.trim().equals(""))
-         {
-            createNode(label, prop, val);
-            return true;
-         }
-      }
-      else if(val != null)
-      {
-         return true;
-      }
-      return false;
+      if(val == null) return -1;
+      if(val.trim().length() == 0) return -1;
+
+      int ID = finder.findIDByProperty(label,
+                  new PropertySet(prop,val));
+
+      return ID >= 0 ? ID : createNode(label, prop, val);
    }
 
-   public void createNode(String... triples)
+   private int createNode(String... triples)
    {
-
       StringBuilder query = new StringBuilder();
 
-      query.append("CREATE (" + triples[0] + ":" + triples[0] + " {");
+      query.append("CREATE (n:").append(triples[0]).append(" {");
       for(int i = 2; i < triples.length; i++)
       {
-         if(i % 2 == 0)
-         { query.append(triples[i - 1] + ":\"" + triples[i] + "\""); }
-         if(i % 2 == 1 && i < triples.length - 1)
-         { query.append(","); }
+         if(i % 2 == 0){
+            query.append(triples[i - 1]).append(":\"")
+            .append(triples[i]).append("\"");
+         } else if(i < triples.length - 1) {
+            query.append(",");
+         }
       }
-      query.append("})");
-      _session.run(query.toString());
-   }
+      query.append("}) return id(n)");
+      StatementResult result = _session.run(query.toString());
 
+      return result.next().get(0).asInt();
+   }
 
    /**
     * Adds a song's ID3 information to the database with the appropriate relationships.
     * Prevents duplicate node and relationships from being created.
     *
-    * @param songPath - path to the song file
     * @param id3      - the ID3Object
     */
-   public void addSong(String songPath, ID3Object id3)
+   private void addSong(ID3Object id3)
    {
-
-      boolean artistExists, albumExists, genreExists;
-
-      String album = sanitizeString(id3.getAlbum());
-      String artist = sanitizeString(id3.getArtist());
-      String composer = sanitizeString(id3.getComposer());
-      String comment = sanitizeString(id3.getComment());
-      String discNo = sanitizeString(id3.getDiscNo());
-      String songName = sanitizeString(id3.getTitle());
-      String track = sanitizeString(id3.getTrack());
-      String year = sanitizeString(id3.getYear());
-      String genre = sanitizeString(id3.getGenre());
-      String fileName = sanitizeString(songPath);
-
-
-      // import song info  /////////
-      if(! nodeExists(Label.SONGNAME, Property.FILENAME, fileName))
-      {
-         createNode(Label.SONGNAME,
-                    Property.SONG_NAME, songName,
-                    Property.TRACK_NUM, track,
-                    Property.COMMENT, comment,
-                    Property.DISC_NO, discNo,
-                    Property.YEAR, year,
-                    Property.COMPOSER_NAME, composer,
-                    Property.FILENAME, fileName);
-         _songCount++;
+      String fileName = Sanitizer.sanitize(id3.getFile());
+      if(nodeExists(Label.SONGNAME, Property.FILENAME, fileName)) {
+         return;
       }
-      // import artist info //////////
-      artistExists = createIfNotExists(Label.ARTIST, Property.ARTIST_NAME, artist);
 
-      ///////// import album info ///////////////
-      albumExists = createIfNotExists(Label.ALBUM, Property.ALBUM_NAME, album);
+      int artistID, albumID, genreID, songID;
+      Finder finder = new Finder(_session);
 
-      ////////// import genre info ////////////////
-      genreExists = createIfNotExists(Label.GENRE, Property.GENRE_NAME, genre);
+      String album = Sanitizer.sanitize(id3.getAlbum());
+      String artist = Sanitizer.sanitize(id3.getArtist());
+      String genre = Sanitizer.sanitize(id3.getGenre());
 
-      // create relationship ARTIST/GENRE
-      if(artistExists && genreExists)
-      {
-         if(! relationshipExists(
-                 Label.GENRE, Property.GENRE_NAME, genre,
-                 Relation.HAS_ARTIST,
-                 Label.ARTIST, Property.ARTIST_NAME, artist)
-                 )
-         {
-            createRelationshipReciprocal(
-                    Label.GENRE, Property.GENRE_NAME, genre,
-                    Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, artist,
-                    Relation.HAS_GENRE
-            );
-         }
-      }
-      // create relationship SONG/GENRE
-      if(genreExists)
-      {
-         if(! relationshipExists(
-                 Label.GENRE, Property.GENRE_NAME, genre,
-                 Relation.HAS_SONG,
-                 Label.SONGNAME, Property.SONG_NAME, songName)
-                 )
-         {
-            createRelationshipReciprocal(
-                    Label.GENRE, Property.GENRE_NAME, genre,
-                    Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, songName,
-                    Relation.HAS_GENRE
-            );
-         }
-      }
-      // create relationship ALBUM/GENRE
-      if(albumExists && genreExists)
-      {
-         if(! relationshipExists(
-                 Label.GENRE, Property.GENRE_NAME, genre,
-                 Relation.HAS_ALBUM,
-                 Label.ALBUM, Property.ALBUM_NAME, album)
-                 )
-         {
-            createRelationshipReciprocal(
-                    Label.GENRE, Property.GENRE_NAME, genre,
-                    Relation.HAS_ALBUM,
-                    Label.ALBUM, Property.ALBUM_NAME, album,
-                    Relation.HAS_GENRE
-            );
-         }
-      }
-      // create relationship ARTIST/SONG
-      if(artistExists)
-      {
-         if(! relationshipExists(
-                 Label.ARTIST, Property.ARTIST_NAME, artist,
-                 Relation.HAS_SONG,
-                 Label.SONGNAME, Property.SONG_NAME, songName)
-                 )
-         {
-            createRelationshipReciprocal(
-                    Label.ARTIST, Property.ARTIST_NAME, artist,
-                    Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, songName,
-                    Relation.HAS_ARTIST);
-         }
-      }
-      // create relationship ALBUM/ARTIST
-      if(albumExists && artistExists)
-      {
-         if(! relationshipExists(
-                 Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                 Label.ARTIST, Property.ARTIST_NAME, artist)
-                 )
-         {
-            createRelationshipReciprocal(
-                    Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_ARTIST,
-                    Label.ARTIST, Property.ARTIST_NAME, artist, Relation.HAS_ALBUM);
-         }
-      }
-      // create relationship ALBUM/SONG
-      if(albumExists)
-      {
-         if(! relationshipExists(
-                 Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
-                 Label.SONGNAME, Property.SONG_NAME, songName)
-                 )
-         {
-            createRelationshipReciprocal(
-                    Label.ALBUM, Property.ALBUM_NAME, album, Relation.HAS_SONG,
-                    Label.SONGNAME, Property.SONG_NAME, songName, Relation.HAS_ALBUM
-            );
-         }
-      }
+      String composer = Sanitizer.sanitize(id3.getComposer());
+      String comment = Sanitizer.sanitize(id3.getComment());
+      String discNo = Sanitizer.sanitize(id3.getDiscNo());
+      String songName = Sanitizer.sanitize(id3.getTitle());
+      String track = Sanitizer.sanitize(id3.getTrack());
+      String year = Sanitizer.sanitize(id3.getYear());
+
+      songID = createNode(Label.SONGNAME,
+                 Property.SONG_NAME, songName,
+                 Property.TRACK_NUM, track,
+                 Property.COMMENT, comment,
+                 Property.DISC_NO, discNo,
+                 Property.YEAR, year,
+                 Property.COMPOSER_NAME, composer,
+                 Property.FILENAME, fileName);
+
+      _songCount++;
+
+      artistID = createIfNotExists(finder,
+              Label.ARTIST, Property.ARTIST_NAME, artist);
+      albumID = createIfNotExists(finder,
+              Label.ALBUM, Property.ALBUM_NAME, album);
+      genreID = createIfNotExists(finder,
+              Label.GENRE, Property.GENRE_NAME, genre);
+
+      createAllRelationships(albumID,artistID,genreID,songID);
    }
 
-   /**
-    * Creates a reciprocal relationship between two nodes given properties.
-    *
-    * @param label1       - first node label
-    * @param property1    - first node subject
-    * @param value1       - first node subject value
-    * @param relationship - relationship to second node
-    * @param label2       - second node label
-    * @param property2    - second node subject
-    * @param value2       - second node value
-    */
-   public void createRelationshipReciprocal(String label1, String property1, String value1, String relationship,
-                                            String label2, String property2, String value2, String relation2)
-   {
-
-      createRelationship(label1, property1, value1, relationship, label2, property2, value2);
-      createRelationship(label2, property2, value2, relation2, label1, property1, value1);
+   void createAllRelationships(int albumID,int artistID,
+                                       int genreID, int songID){
+      // create relationship ARTIST/GENRE
+      if(artistID >= 0 && genreID >= 0) {
+            createRelationship(
+                    Label.GENRE, genreID, Relation.HAS_ARTIST,
+                    Label.ARTIST, artistID, Relation.HAS_GENRE
+            );
+      }
+      // create relationship SONG/GENRE
+      if(genreID >= 0) {
+            createRelationship(
+                    Label.GENRE, genreID, Relation.HAS_SONG,
+                    Label.SONGNAME, songID, Relation.HAS_GENRE
+            );
+      }
+      // create relationship ALBUM/GENRE
+      if(albumID >= 0 && genreID >= 0) {
+            createRelationship(
+                    Label.GENRE, genreID, Relation.HAS_ALBUM,
+                    Label.ALBUM, albumID, Relation.HAS_GENRE
+            );
+      }
+      // create relationship ARTIST/SONG
+      if(artistID >= 0) {
+            createRelationship(
+                    Label.ARTIST, artistID, Relation.HAS_SONG,
+                    Label.SONGNAME, songID, Relation.HAS_ARTIST);
+      }
+      // create relationship ALBUM/ARTIST
+      if(albumID >= 0 && artistID >= 0) {
+            createRelationship(
+                    Label.ALBUM, albumID, Relation.HAS_ARTIST,
+                    Label.ARTIST, artistID, Relation.HAS_ALBUM);
+      }
+      // create relationship ALBUM/SONG
+      if(albumID >= 0) {
+         createRelationship(
+                 Label.ALBUM, albumID, Relation.HAS_SONG,
+                 Label.SONGNAME, songID, Relation.HAS_ALBUM
+         );
+      }
    }
 
    /**
     * Creates a relationship from the first node to the second.
     *
     * @param label1       - first node label
-    * @param property1    - first node subject
-    * @param value1       - first node subject value
-    * @param relationship - relationship to second node
+    * @param ID1          - ID of first node
+    * @param relation1    - relationship to second node
     * @param label2       - second node label
-    * @param property2    - second node subject
-    * @param value2       - second node value
+    * @param ID2          - ID of second node
+    * @param relation2    - relationship to first node
     */
-   public void createRelationship(String label1, String property1, String value1, String relationship,
-                                  String label2, String property2, String value2)
+   private void createRelationship(String label1, int ID1, String relation1,
+                                  String label2, int ID2, String relation2)
    {
-
-      _session.run("MATCH  (one:" + label1 + " {" + property1 + ":\"" + value1 + "\"} )" +
-                           "MATCH  (two:" + label2 + " {" + property2 + ":\"" + value2 + "\"} )" +
-                           "CREATE (one)-[" + relationship + ":" + relationship + "]" +
-                           "->(two)");
+      _session.run("MATCH (one:"+label1+") MATCH (two:"+label2+")"+
+                           " WHERE id(one)="+ID1+" AND id(two)="+ID2+
+                           " MERGE (one)-[:" + relation1 + "]" +
+                           "->(two) MERGE (two)-[:"+relation2+"]->(one)");
    }
 
    /**
@@ -354,7 +248,7 @@ public class Importer
     * @param value   - the subject value
     * @return - true if node exists
     */
-   public boolean nodeExists(String label, String subject, String value)
+   private boolean nodeExists(String label, String subject, String value)
    {
 
       return _session.run("MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
@@ -366,28 +260,19 @@ public class Importer
     * Returns true if there exists a specific relationship between two nodes.
     *
     * @param label1       - first node label
-    * @param property1    - first node subject
-    * @param value1       - first node subject value
+    * @param ID1          - ID of first node
     * @param relationship - relationship to second node
     * @param label2       - second node label
-    * @param property2    - second node subject
-    * @param value2       - second node value
+    * @param ID2          - ID of second node
     * @return - true if that relationship exists
     */
-   public boolean relationshipExists(String label1, String property1, String value1, String relationship,
-                                     String label2, String property2, String value2)
+   public boolean relationshipExists(String label1, int ID1, String relationship,
+                                     String label2, int ID2)
    {
-
       String query = "MATCH (n:" + label1 + ")-[r:" + relationship + "]->(m:" + label2 + ") " +
-                             "WHERE n." + property1 + " = \"" + value1 + "\" " +
-                             "AND m." + property2 + " = \"" + value2 + "\" " +
-                             //                "RETURN n." + property1 + ", m." + property2;
-                             "RETURN SIGN(COUNT(r))";
+                             "WHERE id(n)=" + ID1 + " AND " + "id(m)=" + ID2 + " RETURN SIGN(COUNT(r))";
 
       StatementResult result = _session.run(query);
-      Record record = result.next();
-      return record.get(0).asInt() > 0;
-
-      //       return _session.run(query).hasNext();
+      return result.next().get(0).asInt() > 0;
    }
 }

@@ -99,4 +99,10 @@ public class Music
    {
       this.album = album;
    }
+
+   @Override
+   public boolean equals(Object music){
+      Music that = (Music) music;
+      return this.getFilePath().equals(that.getFilePath());
+   }
 }

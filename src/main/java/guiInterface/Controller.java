@@ -38,22 +38,6 @@ public class Controller {
     private Deleter deleter = new Deleter(dbm.getDatabaseConnector());
     private SearchQuery query = new SearchQuery(dbm.getDatabaseConnector());
 
-    /*
-        JavaFX media support:
-        MP3;
-        AIFF containing uncompressed PCM;
-        WAV containing uncompressed PCM;
-        MPEG-4 multimedia container with Advanced Audio Coding (AAC) audio
-
-        JaudioTagger media support:
-        It currently fully supports Mp3, Mp4 (Mp4 audio, M4a and M4p audio)
-        Ogg Vorbis, Flac and Wma, there is limited support for Wav and Real formats.
-     */
-
-    private final String[] SUPPORTED_EXT = {
-        ".mp3",".m4a",".wav"
-    };
-
     @FXML private javafx.scene.control.Label labelLastOp;
     @FXML private javafx.scene.control.Label labelSongsFound;
     @FXML private javafx.scene.control.Label labelTimeExe;
@@ -153,8 +137,7 @@ public class Controller {
         long startTime = System.currentTimeMillis();
 
         try {
-            importer.addFolderRecursively(rootDir.getAbsolutePath(),
-                    new ArrayList<>(Arrays.asList(SUPPORTED_EXT)));
+            importer.addFolderRecursively(rootDir.getAbsolutePath());
         }catch(Exception e){
             System.err.println("UNABLE TO COMPLETE IMPORT!!");
             e.printStackTrace();
@@ -194,7 +177,7 @@ public class Controller {
         if(result.get() == ButtonType.OK){
             startTime = System.currentTimeMillis();
             Finder finder = new Finder(dbm.getDatabaseConnector());
-            String songID = finder.findIDByProperty(Label.SONGNAME,
+            int songID = finder.findIDByProperty(Label.SONGNAME,
                 new PropertySet(Property.FILENAME,song.getFilePath()));
             deleter.deleteSong(songID);
             double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;

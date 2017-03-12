@@ -18,14 +18,15 @@ public class Finder {
 
     public Finder(Session session){ _session = session; }
 
-    public String findIDByProperty(String label, PropertySet set){
-        String ID;
+    public int findIDByProperty(String label, PropertySet set){
+        int ID = -1;
         String query = "MATCH (n:"+label+" {"+set.prop+": \""
                 + set.val+"\"}) RETURN id(n)";
 
         StatementResult result = _session.run(query);
-        Record record = result.next();
-        ID = Integer.toString(record.get(0).asInt());
+        try {
+            ID = result.next().get(0).asInt();
+        } catch(NoSuchRecordException e){}
 
         return ID;
     }
@@ -45,14 +46,14 @@ public class Finder {
      * @param rel
      * @return  The first id in the relationship
      */
-    public String findIDByRelationship(String label, String ID, String rel){
-        String ID2 = null;
+    public int findIDByRelationship(String label, int ID, String rel){
+        int ID2 = -1;
         String query = "MATCH (n:"+label+")-[:"+rel+"]->(m) WHERE id(n)="+ID+" RETURN id(m)";
 
         StatementResult result = _session.run(query);
         try {
             Record record = result.next();
-            ID2 = Integer.toString(record.get(0).asInt());
+            ID2 = record.get(0).asInt();
         }catch(NoSuchRecordException e){}
 
         return ID2;

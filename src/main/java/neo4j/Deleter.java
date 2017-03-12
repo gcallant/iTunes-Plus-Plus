@@ -34,55 +34,55 @@ public class Deleter {
         _session.run(clearAll);
     }
 
-    public void deleteByID(List<String> IDs){
-        for(String s : IDs){
-            deleteByID(s);
+    public void deleteByID(List<Integer> IDs){
+        for(int id : IDs){
+            deleteByID(id);
         }
     }
 
-    public void deleteSong(String songID){
+    public void deleteSong(int songID){
         Finder finder = new Finder(_session);
-        String artistID = finder.findIDByRelationship(
+        int artistID = finder.findIDByRelationship(
                 Label.SONGNAME,songID,Relation.HAS_ARTIST
         );
-        String albumID = finder.findIDByRelationship(
+        int albumID = finder.findIDByRelationship(
                 Label.SONGNAME,songID,Relation.HAS_ALBUM
         );
-        String genreID = finder.findIDByRelationship(
+        int genreID = finder.findIDByRelationship(
                 Label.SONGNAME,songID,Relation.HAS_GENRE
         );
 
         deleteByID(songID);
-        if(artistID != null) deleteOnEmpty(artistID);
-        if(albumID != null) deleteOnEmpty(albumID);
-        if(genreID != null) deleteOnEmpty(genreID);
+        if(artistID >= 0) deleteOnEmpty(artistID);
+        if(albumID >= 0) deleteOnEmpty(albumID);
+        if(genreID >= 0) deleteOnEmpty(genreID);
     }
 
-    public void deleteByID(String ID){
+    public void deleteByID(int ID){
         String query = "MATCH (n) WHERE id(n)="+ID+" DETACH DELETE n";
         _session.run(query);
     }
 
     public void deleteByProperty(String label, PropertySet set){
         Finder finder = new Finder(_session);
-        String ID = finder.findIDByProperty(label, set);
+        int ID = finder.findIDByProperty(label, set);
         deleteByID(ID);
     }
 
     //deletes node IF there are no relations to it
-    void deleteOnEmpty(String ID){
+    void deleteOnEmpty(int ID){
         if(!hasSongs(ID)){
             deleteByID(ID);
         }
     }
 
-    void deleteSongOnEmpty(String ID){
+    void deleteSongOnEmpty(int ID){
         if(!hasRelationships(ID)){
             deleteByID(ID);
         }
     }
 
-    void deleteRelationship(String ID1, String label1, String ID2, String label2){
+    void deleteRelationship(int ID1, String label1, int ID2, String label2){
         String query = "MATCH (n:"+label1+")-[r]-(m:"+label2+") WHERE id(n)="+ID1
             + " AND id(m)="+ID2+" DELETE r";
 
@@ -92,7 +92,7 @@ public class Deleter {
 //-----------------------------------------------------------------------------
 // PRIVATE METHODS
 //-----------------------------------------------------------------------------
-    private boolean hasRelationships(String ID){
+    private boolean hasRelationships(int ID){
         int relCnt;
         String query = "MATCH (n)-[r]-(a) WHERE id(n)="+ID+" RETURN COUNT(r)";
 
@@ -103,7 +103,7 @@ public class Deleter {
         return (relCnt > 0);
     }
 
-    private boolean hasSongs(String ID){
+    private boolean hasSongs(int ID){
         int songCnt;
         String query = "MATCH (n)-[:"+Relation.HAS_SONG+"]->(a) "
             + "WHERE id(n)="+ID+" RETURN COUNT(a)";
