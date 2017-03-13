@@ -1,8 +1,11 @@
 package neo4j;
 
+import com.sun.org.apache.bcel.internal.generic.RETURN;
+import com.sun.xml.internal.bind.v2.model.core.ID;
 import org.neo4j.driver.v1.*;
 import Values.*;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -16,30 +19,38 @@ public class Deleter {
 // PARAMS
 //-----------------------------------------------------------------------------
     private Session _session;
-//    private QueryHandler _qHandler;
-
 //-----------------------------------------------------------------------------
 // CONSTRUCTORS
 //-----------------------------------------------------------------------------
     public Deleter(Session session){
         _session = session;
-//        _qHandler = new QueryHandler(_session);
     }
-
 //-----------------------------------------------------------------------------
 // PUBLIC METHODS
 //-----------------------------------------------------------------------------
+
+    /**
+     * Removes everything from database
+     */
     public void cleanDatabase(){
         String clearAll = "MATCH (n) DETACH DELETE n";
         _session.run(clearAll);
     }
 
-    public void deleteByID(List<Integer> IDs){
+    /**
+     * Removes a list of nodes based on IDs
+     * @param IDs   List of node IDs
+     */
+    public void deleteSong(List<Integer> IDs){
         for(int id : IDs){
-            deleteByID(id);
+            deleteSong(id);
         }
     }
 
+    /**
+     * Deletes a song
+     * @param songID    Node ID
+     */
     public void deleteSong(int songID){
         Finder finder = new Finder(_session);
         int artistID = finder.findIDByRelationship(
@@ -58,18 +69,52 @@ public class Deleter {
         if(genreID >= 0) deleteOnEmpty(genreID);
     }
 
-    public void deleteByID(int ID){
+    /**
+     * Deletes node, all songs associated with it, and any
+     * other labels whom no long have any associated songs.
+     * @param ID Node ID
+     */
+    public void deleteNode(String label, int ID){
+        LinkedList<Integer> IDList = new LinkedList<>();
+        String query = "MATCH (n:"+label+")-[:"+Relation.HAS_SONG+"]->(m) "
+                + "WHERE id(n)="+ID+" RETURN id(m)";
+        StatementResult result = _session.run(query);
+
+        while (result.hasNext()){
+            Record record = result.next();
+            IDList.add(record.get(0).asInt());
+        }
+
+        deleteSong(IDList);
+    }
+
+    /**
+     * Deletes node and relationships
+     * @param ID Node ID
+     */
+    public void deleteNodeSimple(int ID){
         String query = "MATCH (n) WHERE id(n)="+ID+" DETACH DELETE n";
         _session.run(query);
     }
 
+    /**
+     * Deletes node based on property.
+     * @param label Node label
+     * @param set   The property and its value
+     */
     public void deleteByProperty(String label, PropertySet set){
         Finder finder = new Finder(_session);
         int ID = finder.findIDByProperty(label, set);
         deleteByID(ID);
     }
 
-    //deletes node IF there are no relations to it
+//-----------------------------------------------------------------------------
+// PACKAGE PRIVATE METHODS
+//-----------------------------------------------------------------------------
+    /**
+     * Deletes node IF there are no relations to it
+     * @param ID Node ID
+     */
     void deleteOnEmpty(int ID){
         if(!hasSongs(ID)){
             deleteByID(ID);
@@ -101,6 +146,15 @@ public class Deleter {
         relCnt = record.get(0).asInt();
 
         return (relCnt > 0);
+    }
+
+    /**
+     * Deletes a node using its ID. Deletes relationships as well.
+     * @param ID
+     */
+    private void deleteByID(int ID){
+        String query = "MATCH (n) WHERE id(n)="+ID+" DETACH DELETE n";
+        _session.run(query);
     }
 
     private boolean hasSongs(int ID){

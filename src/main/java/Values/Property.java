@@ -14,4 +14,17 @@ public class Property {
     public final static String SONG_NAME = "songName";
     public final static String TRACK_NUM = "trackNumber";
     public final static String YEAR = "year";
+
+    public static String getPropNameByLabel(String label){
+        switch(label){
+            case Label.ALBUM :
+                return Property.ALBUM_NAME;
+            case Label.ARTIST :
+                return Property.ARTIST_NAME;
+            case Label.GENRE :
+                return Property.GENRE_NAME;
+            default :
+                return Property.SONG_NAME;
+        }
+    }
 }

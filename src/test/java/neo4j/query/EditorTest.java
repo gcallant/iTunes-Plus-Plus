@@ -54,7 +54,7 @@ public class EditorTest {
         req.genre = "newGenre";
         req.year = "nyear";
 
-        _editor.edit(req, id3);
+        _editor.editSong(req, id3);
     }
 
     private String findIDByProperty(String label, PropertySet set){

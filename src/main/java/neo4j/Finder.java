@@ -31,7 +31,7 @@ public class Finder {
         return ID;
     }
 
-    public PropertySet findPropertyByID(String label, String ID, String prop){
+    public PropertySet findPropertyByID(String label, int ID, String prop){
         String query = "MATCH (n:"+label+") WHERE id(n)="+ID+" RETURN n."+prop;
 
         StatementResult result = _session.run(query);

@@ -71,14 +71,14 @@ public class ControllerEdit {
         editRequest.year = year.getText();
 
         long startTime = System.currentTimeMillis();
-        editor.edit(editRequest, id3);
+        editor.editSong(editRequest, id3);
         double totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
 
         parent.setEditTime(totalTime);
         handleBtnCancel(event);
     }
 
-    @FXML protected void handleBtnCancel(MouseEvent event)
+    @FXML private void handleBtnCancel(MouseEvent event)
     {
         Stage stage = (Stage) cancel.getScene().getWindow();
         stage.close();
