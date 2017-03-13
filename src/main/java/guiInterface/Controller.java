@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import neo4j.*;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class Controller {
     private String prevSearch;
     private DatabaseManager dbm = DatabaseManager.getInstance();
     private Importer importer = new Importer(dbm.getDatabaseConnector());
+    private Finder finder = new Finder(dbm.getDatabaseConnector());
     private Editor editor = new Editor(dbm.getDatabaseConnector());
     private Deleter deleter = new Deleter(dbm.getDatabaseConnector());
     private SearchQuery query = new SearchQuery(dbm.getDatabaseConnector());
@@ -123,6 +125,8 @@ public class Controller {
         }
     }
 
+    //IMPORT-------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     @FXML protected void handleMenuItemImport(ActionEvent event)
     {
         int songCnt;
@@ -158,7 +162,9 @@ public class Controller {
         updateInfo("Import", totalTime);
     }
 
-    @FXML protected void handleMenuItemDelete(ActionEvent event)
+    //DELETE-------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    @FXML protected void handleMenuItemDeleteSong(ActionEvent event)
     {
         if(curTrack < 0){
             noSelection("Delete Song");
@@ -176,7 +182,6 @@ public class Controller {
         Optional<ButtonType> result = alert.showAndWait();
         if(result.get() == ButtonType.OK){
             startTime = System.currentTimeMillis();
-            Finder finder = new Finder(dbm.getDatabaseConnector());
             int songID = finder.findIDByProperty(Label.SONGNAME,
                 new PropertySet(Property.FILENAME,song.getFilePath()));
             deleter.deleteSong(songID);
@@ -187,7 +192,69 @@ public class Controller {
         refreshResults();
     }
 
-    @FXML protected void handleMenuItemEdit(ActionEvent event)
+    @FXML protected void handleMenuItemDeleteArtist(ActionEvent event) {
+        if(curTrack < 0){
+            noSelection("Delete Artist");
+            return;
+        }
+        Music song = getSelectedMusic();
+        int songID = finder.findIDByProperty(Label.SONGNAME,
+                new PropertySet(Property.FILENAME,song.getFilePath()));
+        int artistID = finder.findIDByRelationship(Label.SONGNAME,
+                songID,Relation.HAS_ARTIST);
+        if(artistID < 0){
+            noRecord("Delete Artist");
+            return;
+        }
+        String artist = finder.findPropertyByID(Label.ARTIST,artistID,
+                Property.ARTIST_NAME).val;
+
+        deleteItem(artist,Label.ARTIST,artistID);
+    }
+
+    @FXML protected void handleMenuItemDeleteAlbum(ActionEvent event) {
+        if(curTrack < 0){
+            noSelection("Delete Album");
+            return;
+        }
+        Music song = getSelectedMusic();
+        int songID = finder.findIDByProperty(Label.SONGNAME,
+                new PropertySet(Property.FILENAME,song.getFilePath()));
+        int albumID = finder.findIDByRelationship(Label.SONGNAME,
+                songID,Relation.HAS_ALBUM);
+        if(albumID < 0){
+            noRecord("Delete Album");
+            return;
+        }
+        String album = finder.findPropertyByID(Label.ALBUM,albumID,
+                Property.ALBUM_NAME).val;
+
+        deleteItem(album,Label.ALBUM,albumID);
+    }
+
+    @FXML protected void handleMenuItemDeleteGenre(ActionEvent event) {
+        if(curTrack < 0){
+            noSelection("Delete Genre");
+            return;
+        }
+        Music song = getSelectedMusic();
+        int songID = finder.findIDByProperty(Label.SONGNAME,
+                new PropertySet(Property.FILENAME,song.getFilePath()));
+        int genreID = finder.findIDByRelationship(Label.SONGNAME,
+                songID,Relation.HAS_GENRE);
+        if(genreID < 0){
+            noRecord("Delete Genre");
+            return;
+        }
+        String genre = finder.findPropertyByID(Label.GENRE,genreID,
+                Property.GENRE_NAME).val;
+
+        deleteItem(genre,Label.GENRE,genreID);
+    }
+
+    //EDIT---------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    @FXML protected void handleMenuItemEditSong(ActionEvent event)
     {
         if(curTrack < 0){
             noSelection("Edit Song");
@@ -202,19 +269,82 @@ public class Controller {
             stage.setScene(new Scene(loader.load()));
             controller.initData(song);
         }catch(IOException e){
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("File not found");
-            alert.setHeaderText("Unable to locate file: " + song);
-            alert.setContentText("Please double check that your file still exists.");
-            alert.initOwner(getPrimaryStage());
-            alert.show();
+            noFile(song);
             return;
         }
-        stage.setTitle("ITunes++ Song Editor");
+        stage.setTitle("iTunes++ - Edit Song");
         stage.initOwner(getPrimaryStage());
         stage.show();
     }
 
+    @FXML protected void handleMenuItemEditArtist(ActionEvent event)
+    {
+        if(curTrack < 0){
+            noSelection("Edit Artist");
+            return;
+        }
+        String song = getSelectedSongPath();
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("edit-node.fxml"));
+        ControllerNodeEdit controller = new ControllerNodeEdit(finder, editor, this);
+        loader.setController(controller);
+        Stage stage = new Stage(StageStyle.DECORATED);
+        try{
+            stage.setScene(new Scene(loader.load()));
+            controller.initData(Label.ARTIST, song);
+        }catch(IOException e){
+            noFile(song);
+            return;
+        }
+        stage.setTitle("iTunes++ - Edit Artist");
+        stage.initOwner(getPrimaryStage());
+        stage.show();
+    }
+
+    @FXML protected void handleMenuItemEditAlbum(ActionEvent event)
+    {
+        if(curTrack < 0){
+            noSelection("Edit Album");
+            return;
+        }
+        String song = getSelectedSongPath();
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("edit-node.fxml"));
+        ControllerNodeEdit controller = new ControllerNodeEdit(finder,editor,this);
+        loader.setController(controller);
+        Stage stage = new Stage(StageStyle.DECORATED);
+        try{
+            stage.setScene(new Scene(loader.load()));
+            controller.initData(Label.ALBUM, song);
+        }catch(IOException e){
+            noFile(song);
+            return;
+        }
+        stage.setTitle("iTunes++ - Edit Album");
+        stage.initOwner(getPrimaryStage());
+        stage.show();
+    }
+
+    @FXML protected void handleMenuItemEditGenre(ActionEvent event)
+    {
+        if(curTrack < 0){
+            noSelection("Edit Genre");
+            return;
+        }
+        String song = getSelectedSongPath();
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("edit-node.fxml"));
+        ControllerNodeEdit controller = new ControllerNodeEdit(finder,editor,this);
+        loader.setController(controller);
+        Stage stage = new Stage(StageStyle.DECORATED);
+        try{
+            stage.setScene(new Scene(loader.load()));
+            controller.initData(Label.GENRE, song);
+        }catch(IOException e){
+            noFile(song);
+            return;
+        }
+        stage.setTitle("iTunes++ - Edit Genre");
+        stage.initOwner(getPrimaryStage());
+        stage.show();
+    }
     //SEARCHING----------------------------------------------------------------
     //-------------------------------------------------------------------------
     @FXML protected void handleTableView(MouseEvent event){
@@ -252,11 +382,51 @@ public class Controller {
 //-----------------------------------------------------------------------------
 // PRIVATE METHODS
 //-----------------------------------------------------------------------------
+    private void deleteItem(String itemName, String label, int id){
+        long startTime;
+        double totalTime=0;
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("iTunes++ - Delete "+label);
+        alert.setHeaderText("Remove "+label+" from database?");
+        alert.setContentText("Are you sure you want to remove '"+itemName
+                +"' and all its associated songs from the database?\n"
+                +"*Note: Your file(s) will not be deleted.");
+        alert.initOwner(getPrimaryStage());
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if(!result.isPresent()) return;
+        if(result.get() == ButtonType.OK){
+            startTime = System.currentTimeMillis();
+            deleter.deleteNode(label,id);
+            totalTime = ((double)System.currentTimeMillis() - startTime)/1000;
+        }
+        refreshResults();
+        updateInfo("Delete", totalTime);
+    }
+
+    private void noFile(String song){
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("File not found");
+        alert.setHeaderText("Unable to locate file: " + song);
+        alert.setContentText("Please double check that your file still exists.");
+        alert.initOwner(getPrimaryStage());
+        alert.show();
+    }
     private void noSelection(String title){
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText("No song is selected");
         alert.setContentText("Please select a song and try again.");
+        alert.initOwner(getPrimaryStage());
+        alert.show();
+    }
+
+    private void noRecord(String title){
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText("No record exists for this selection");
+        alert.setContentText("Please check the contents of this song.");
         alert.initOwner(getPrimaryStage());
         alert.show();
     }

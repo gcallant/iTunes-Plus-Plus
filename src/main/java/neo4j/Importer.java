@@ -29,8 +29,7 @@ public class Importer
    private int _songCount = 0;
    private Session _session;
 
-   public Importer(Session session)
-   {
+   public Importer(Session session) {
       _session = session;
    }
 
@@ -148,7 +147,6 @@ public class Importer
       String album = Sanitizer.sanitize(id3.getAlbum());
       String artist = Sanitizer.sanitize(id3.getArtist());
       String genre = Sanitizer.sanitize(id3.getGenre());
-
       String composer = Sanitizer.sanitize(id3.getComposer());
       String comment = Sanitizer.sanitize(id3.getComment());
       String discNo = Sanitizer.sanitize(id3.getDiscNo());

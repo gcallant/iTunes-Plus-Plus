@@ -16,4 +16,9 @@ public class Sanitizer {
         if(dirty == null) return null;
         return dirty.replace('\"', '\'').replace("\\", "//");
     }
+
+    public static String unsanitize(String dirty){
+        if(dirty == null) return null;
+        return dirty.replace('\'', '\"').replace("//", "\\");
+    }
 }

@@ -8,13 +8,10 @@
 
 <?import javafx.stage.Screen?>
 
-<?import java.lang.Double?>
-
 <?import guiInterface.MediaControl?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="guiInterface.Controller">
     <fx:define>
         <Screen fx:factory="getPrimary" fx:id="screen" />
-        <!--<Double fx:id="xHeight" fx:value="${screen.visualBounds.height}" />-->
     </fx:define>
     <children>
         <MenuBar fx:id="menuBar">
@@ -23,13 +20,28 @@
                     <items>
                         <MenuItem id="menu_item_import" onAction="#handleMenuItemImport" mnemonicParsing="false" text="Import" />
                         <MenuItem id="menu_item_clearAll" onAction="#handleMenuItemClearAll" mnemonicParsing="false" text="Clear All" />
+                        <SeparatorMenuItem  />
                         <MenuItem id="menu_item_close" onAction="#handleMenuItemClose" mnemonicParsing="false" text="Close" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
+                <Menu mnemonicParsing="false" text="Tools">
                     <items>
-                        <MenuItem id="menu_item_edit" onAction="#handleMenuItemEdit" mnemonicParsing="false" text="Edit Song" />
-                        <MenuItem id="menu_item_delete" onAction="#handleMenuItemDelete" mnemonicParsing="false" text="Delete" />
+                        <Menu mnemonicParsing="false" text="Edit">
+                            <items>
+                                <MenuItem id="menu_item_edit_song" onAction="#handleMenuItemEditSong" mnemonicParsing="false" text="Edit Song" />
+                                <MenuItem id="menu_item_edit_artist" onAction="#handleMenuItemEditArtist" mnemonicParsing="false" text="Edit Artist" />
+                                <MenuItem id="menu_item_edit_album" onAction="#handleMenuItemEditAlbum" mnemonicParsing="false" text="Edit Album" />
+                                <MenuItem id="menu_item_edit_genre" onAction="#handleMenuItemEditGenre" mnemonicParsing="false" text="Edit Genre" />
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Delete">
+                            <items>
+                                <MenuItem id="menu_item_delete_song" onAction="#handleMenuItemDeleteSong" mnemonicParsing="false" text="Delete Song" />
+                                <MenuItem id="menu_item_delete_artist" onAction="#handleMenuItemDeleteArtist" mnemonicParsing="false" text="Delete Artist" />
+                                <MenuItem id="menu_item_delete_album" onAction="#handleMenuItemDeleteAlbum" mnemonicParsing="false" text="Delete Album" />
+                                <MenuItem id="menu_item_delete_genre" onAction="#handleMenuItemDeleteGenre" mnemonicParsing="false" text="Delete Genre" />
+                            </items>
+                        </Menu>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
