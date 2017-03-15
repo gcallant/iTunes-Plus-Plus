@@ -70,6 +70,7 @@ public class DatabaseManager
    {
       return databaseConnector;
    }
+   public Session getUniqueSession() { return driver.session(); }
 
    public void closeConnection()
    {

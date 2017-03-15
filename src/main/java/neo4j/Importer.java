@@ -10,6 +10,7 @@ import Values.PropertySet;
 import Values.Relation;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.exceptions.TransientException;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +24,7 @@ import static org.neo4j.driver.v1.Values.parameters;
  *
  * @author Josh Cotes
  */
-public class Importer
-{
+public class Importer {
 
    private int _songCount = 0;
    private Session _session;
@@ -36,54 +36,51 @@ public class Importer
    /**
     * Retrieves all files from all folders recursively from given file root.
     * Searches for file extension.
-    *
+    * <p>
     * Note: May improve performance to use two queues - one to grab filepaths
     * that are turned into ID3Objects, and one to grab ID3Objects and store
     * them into database.
     *
-    * @param root          - file path
+    * @param root - file path
     */
-   public void addFolderRecursively(String root)
-   {
+   public void addFolderRecursively(String root) {
       SharedQueue<String> importList = new SharedQueue<>(10_000);
 
       //Grabs all files that match supported media extensions and
       //store them into importList
       Thread fileGrabber = new Thread(new Runnable() {
-         @Override public void run() {
-            FileHandler.getAllMusicFiles(new File(root),importList);
+         @Override
+         public void run() {
+            FileHandler.getAllMusicFiles(new File(root), importList);
             importList.stop();
          }
       });
       fileGrabber.start();
 
-      //Grabs all file paths from importList, create ID3Objects,
-      //and store into database
-      Thread dbImporter = new Thread(new Runnable() {
-         @Override public void run() {
-            while(!importList.isEmpty() || !importList.isStopped()){
-               String filepath = importList.dequeue();
-               try {
-                  ID3Object id3 = new ID3Object(new File(filepath));
-                  addSong(id3);
-               }catch(IOException e){
-                  System.err.println("Unable to create ID3Object from '"
-                          + filepath + "'");
-               }
-            }
-         }
-      });
-      dbImporter.start();
-
-      while(dbImporter.isAlive()) {
-         try {
-            dbImporter.join();
-         } catch (InterruptedException e){}
-      }
+      importToDatabase(importList);
    }
 
-   public int getSongCount()
-   {
+   private void importToDatabase(SharedQueue<String> fileList) {
+      int cnt = 0;
+      int cores = Runtime.getRuntime().availableProcessors();
+      DBWorker[] workers = new DBWorker[cores];
+
+      for (int i = 0; i < cores; i++) {
+         DBWorker worker = new DBWorker(fileList);
+         workers[i] = worker;
+         worker.start();
+      }
+      for (int i = 0; i < cores; i++) {
+         try {
+            workers[i].join();
+            cnt += workers[i].getCount();
+         } catch (InterruptedException e) {
+         }
+      }
+      _songCount = cnt;
+   }
+
+   public int getSongCount() {
       int tmp = _songCount;
       _songCount = 0;
       return tmp;
@@ -93,32 +90,29 @@ public class Importer
     * Creates a node if it does not already exist.
     *
     * @param label Node label
-    * @param prop Node property
-    * @param val Node value
+    * @param prop  Node property
+    * @param val   Node value
     * @return True if a node is created or already exists.
     */
-   public int createIfNotExists(Finder finder, String label, String prop, String val)
-   {
-      if(val == null) return -1;
-      if(val.trim().length() == 0) return -1;
+   int createIfNotExists(Finder finder, String label, String prop, String val) {
+      if (val == null) return -1;
+      if (val.trim().length() == 0) return -1;
 
       int ID = finder.findIDByProperty(label,
-                  new PropertySet(prop,val));
+              new PropertySet(prop, val));
 
       return ID >= 0 ? ID : createNode(label, prop, val);
    }
 
-   private int createNode(String... triples)
-   {
+   private int createNode(String... triples) {
       StringBuilder query = new StringBuilder();
 
       query.append("CREATE (n:").append(triples[0]).append(" {");
-      for(int i = 2; i < triples.length; i++)
-      {
-         if(i % 2 == 0){
+      for (int i = 2; i < triples.length; i++) {
+         if (i % 2 == 0) {
             query.append(triples[i - 1]).append(":\"")
-            .append(triples[i]).append("\"");
-         } else if(i < triples.length - 1) {
+                    .append(triples[i]).append("\"");
+         } else if (i < triples.length - 1) {
             query.append(",");
          }
       }
@@ -132,12 +126,11 @@ public class Importer
     * Adds a song's ID3 information to the database with the appropriate relationships.
     * Prevents duplicate node and relationships from being created.
     *
-    * @param id3      - the ID3Object
+    * @param id3 - the ID3Object
     */
-   private void addSong(ID3Object id3)
-   {
+   void addSong(ID3Object id3) {
       String fileName = Sanitizer.sanitize(id3.getFile());
-      if(nodeExists(Label.SONGNAME, Property.FILENAME, fileName)) {
+      if (nodeExists(Label.SONGNAME, Property.FILENAME, fileName)) {
          return;
       }
 
@@ -155,13 +148,13 @@ public class Importer
       String year = Sanitizer.sanitize(id3.getYear());
 
       songID = createNode(Label.SONGNAME,
-                 Property.SONG_NAME, songName,
-                 Property.TRACK_NUM, track,
-                 Property.COMMENT, comment,
-                 Property.DISC_NO, discNo,
-                 Property.YEAR, year,
-                 Property.COMPOSER_NAME, composer,
-                 Property.FILENAME, fileName);
+              Property.SONG_NAME, songName,
+              Property.TRACK_NUM, track,
+              Property.COMMENT, comment,
+              Property.DISC_NO, discNo,
+              Property.YEAR, year,
+              Property.COMPOSER_NAME, composer,
+              Property.FILENAME, fileName);
 
       _songCount++;
 
@@ -172,46 +165,46 @@ public class Importer
       genreID = createIfNotExists(finder,
               Label.GENRE, Property.GENRE_NAME, genre);
 
-      createAllRelationships(albumID,artistID,genreID,songID);
+      createAllRelationships(albumID, artistID, genreID, songID);
    }
 
-   void createAllRelationships(int albumID,int artistID,
-                                       int genreID, int songID){
+   void createAllRelationships(int albumID, int artistID,
+                               int genreID, int songID) {
       // create relationship ARTIST/GENRE
-      if(artistID >= 0 && genreID >= 0) {
-            createRelationship(
-                    Label.GENRE, genreID, Relation.HAS_ARTIST,
-                    Label.ARTIST, artistID, Relation.HAS_GENRE
-            );
+      if (artistID >= 0 && genreID >= 0) {
+         createRelationship(
+                 Label.GENRE, genreID, Relation.HAS_ARTIST,
+                 Label.ARTIST, artistID, Relation.HAS_GENRE
+         );
       }
       // create relationship SONG/GENRE
-      if(genreID >= 0) {
-            createRelationship(
-                    Label.GENRE, genreID, Relation.HAS_SONG,
-                    Label.SONGNAME, songID, Relation.HAS_GENRE
-            );
+      if (genreID >= 0) {
+         createRelationship(
+                 Label.GENRE, genreID, Relation.HAS_SONG,
+                 Label.SONGNAME, songID, Relation.HAS_GENRE
+         );
       }
       // create relationship ALBUM/GENRE
-      if(albumID >= 0 && genreID >= 0) {
-            createRelationship(
-                    Label.GENRE, genreID, Relation.HAS_ALBUM,
-                    Label.ALBUM, albumID, Relation.HAS_GENRE
-            );
+      if (albumID >= 0 && genreID >= 0) {
+         createRelationship(
+                 Label.GENRE, genreID, Relation.HAS_ALBUM,
+                 Label.ALBUM, albumID, Relation.HAS_GENRE
+         );
       }
       // create relationship ARTIST/SONG
-      if(artistID >= 0) {
-            createRelationship(
-                    Label.ARTIST, artistID, Relation.HAS_SONG,
-                    Label.SONGNAME, songID, Relation.HAS_ARTIST);
+      if (artistID >= 0) {
+         createRelationship(
+                 Label.ARTIST, artistID, Relation.HAS_SONG,
+                 Label.SONGNAME, songID, Relation.HAS_ARTIST);
       }
       // create relationship ALBUM/ARTIST
-      if(albumID >= 0 && artistID >= 0) {
-            createRelationship(
-                    Label.ALBUM, albumID, Relation.HAS_ARTIST,
-                    Label.ARTIST, artistID, Relation.HAS_ALBUM);
+      if (albumID >= 0 && artistID >= 0) {
+         createRelationship(
+                 Label.ALBUM, albumID, Relation.HAS_ARTIST,
+                 Label.ARTIST, artistID, Relation.HAS_ALBUM);
       }
       // create relationship ALBUM/SONG
-      if(albumID >= 0) {
+      if (albumID >= 0) {
          createRelationship(
                  Label.ALBUM, albumID, Relation.HAS_SONG,
                  Label.SONGNAME, songID, Relation.HAS_ALBUM
@@ -222,20 +215,27 @@ public class Importer
    /**
     * Creates a relationship from the first node to the second.
     *
-    * @param label1       - first node label
-    * @param ID1          - ID of first node
-    * @param relation1    - relationship to second node
-    * @param label2       - second node label
-    * @param ID2          - ID of second node
-    * @param relation2    - relationship to first node
+    * @param label1    - first node label
+    * @param ID1       - ID of first node
+    * @param relation1 - relationship to second node
+    * @param label2    - second node label
+    * @param ID2       - ID of second node
+    * @param relation2 - relationship to first node
     */
    private void createRelationship(String label1, int ID1, String relation1,
-                                  String label2, int ID2, String relation2)
-   {
-      _session.run("MATCH (one:"+label1+") MATCH (two:"+label2+")"+
-                           " WHERE id(one)="+ID1+" AND id(two)="+ID2+
-                           " MERGE (one)-[:" + relation1 + "]" +
-                           "->(two) MERGE (two)-[:"+relation2+"]->(one)");
+                                   String label2, int ID2, String relation2) {
+      boolean success = false;
+      while (!success) {
+         try {
+            _session.run("MATCH (one:" + label1 + ") MATCH (two:" + label2 + ")" +
+                    " WHERE id(one)=" + ID1 + " AND id(two)=" + ID2 +
+                    " MERGE (one)-[:" + relation1 + "]" +
+                    "->(two) MERGE (two)-[:" + relation2 + "]->(one)");
+            success = true;
+         } catch (TransientException e) {
+            System.err.println("Trying again for lock...");
+         }
+      }
    }
 
    /**
@@ -246,31 +246,52 @@ public class Importer
     * @param value   - the subject value
     * @return - true if node exists
     */
-   private boolean nodeExists(String label, String subject, String value)
-   {
+   private boolean nodeExists(String label, String subject, String value) {
+      boolean success = false;
+      boolean exists = false;
+      while (!success) {
+         try {
+            exists = _session.run("MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
+                            "RETURN a." + subject + " AS " + subject,
+                    parameters(subject, value)).hasNext();
+            success = true;
+         } catch (TransientException e) {
+            System.err.println("nodeExists: Trying for lock...");
+         }
+      }
+      return exists;
+   }
+}
 
-      return _session.run("MATCH (a:" + label + ") WHERE a." + subject + " = {" + subject + "} " +
-                                  "RETURN a." + subject + " AS " + subject,
-                          parameters(subject, value)).hasNext();
+class DBWorker extends Thread {
+   private SharedQueue<String> importList;
+   private int count = 0;
+
+   DBWorker(SharedQueue<String> fileList) {
+      importList = fileList;
    }
 
-   /**
-    * Returns true if there exists a specific relationship between two nodes.
-    *
-    * @param label1       - first node label
-    * @param ID1          - ID of first node
-    * @param relationship - relationship to second node
-    * @param label2       - second node label
-    * @param ID2          - ID of second node
-    * @return - true if that relationship exists
-    */
-   public boolean relationshipExists(String label1, int ID1, String relationship,
-                                     String label2, int ID2)
-   {
-      String query = "MATCH (n:" + label1 + ")-[r:" + relationship + "]->(m:" + label2 + ") " +
-                             "WHERE id(n)=" + ID1 + " AND " + "id(m)=" + ID2 + " RETURN SIGN(COUNT(r))";
+   @Override
+   public void run() {
+      DatabaseManager dbm = DatabaseManager.getInstance();
+      Session session = dbm.getUniqueSession();
+      Importer myImporter = new Importer(session);
 
-      StatementResult result = _session.run(query);
-      return result.next().get(0).asInt() > 0;
+      while (!importList.isEmpty() || !importList.isStopped()) {
+         String filepath = importList.dequeue();
+         try {
+            ID3Object id3 = new ID3Object(new File(filepath));
+            myImporter.addSong(id3);
+         } catch (IOException e) {
+            System.err.println("Unable to create ID3Object from '"
+                    + filepath + "'");
+         }
+      }
+      session.close();
+      count = myImporter.getSongCount();
+   }
+
+   int getCount() {
+      return count;
    }
 }

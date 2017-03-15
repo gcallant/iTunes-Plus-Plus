@@ -23,7 +23,7 @@ public class SharedQueue<E> implements Iterable<E> {
     }
 
     public synchronized void enqueue(E job) throws IllegalArgumentException {
-        if (isFull()) {
+        while(isFull()) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -35,7 +35,7 @@ public class SharedQueue<E> implements Iterable<E> {
     }
 
     public synchronized E dequeue() throws NoSuchElementException {
-        if (isEmpty()) {
+        while(isEmpty()) {
             try {
                 wait();
             } catch (InterruptedException e) {

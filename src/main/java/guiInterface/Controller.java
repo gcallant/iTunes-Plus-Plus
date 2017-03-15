@@ -20,7 +20,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import neo4j.*;
-import org.apache.commons.lang3.text.WordUtils;
 
 import java.io.File;
 import java.io.IOException;
