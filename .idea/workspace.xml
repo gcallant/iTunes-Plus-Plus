@@ -1014,7 +1014,14 @@
       <option name="project" value="LOCAL" />
       <updated>1489385716051</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Started new branch">
+      <created>1489545854530</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1489545854530</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1143,7 +1150,8 @@
     <MESSAGE value="Information displays at bottom of GUI. Goodbye ID3 logging!" />
     <MESSAGE value="Importer working better! Also, no more duplicates in search." />
     <MESSAGE value="Can now edit and delete based on labels" />
-    <option name="LAST_COMMIT_MESSAGE" value="Can now edit and delete based on labels" />
+    <MESSAGE value="Started new branch" />
+    <option name="LAST_COMMIT_MESSAGE" value="Started new branch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
