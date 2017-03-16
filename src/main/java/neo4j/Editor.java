@@ -181,7 +181,8 @@ public class Editor {
         int songID = _finder.findIDByProperty(Label.SONGNAME,
                 new PropertySet(Property.FILENAME, req.filename));
 
-        int artistID, albumID, genreID, oldID;
+        int artistID, albumID, genreID;
+        int oldArtistID = -1, oldAlbumID = -1, oldGenreID = -1;
 
         // set song -----------------------------------------------------------
         LinkedList<PropertySet> songProperties =
@@ -192,29 +193,61 @@ public class Editor {
         artistID = importer.createIfNotExists(_finder,
                 Label.ARTIST,Property.ARTIST_NAME,req.artist);
         if(!req.sameArtist()){
-            oldID = importer.createIfNotExists(_finder,
-                    Label.ARTIST,Property.ARTIST_NAME,original.artist);
-            deleter.deleteRelationship(songID, Label.SONGNAME, oldID, Label.ARTIST);
+            oldArtistID = _finder.findIDByProperty(Label.ARTIST,
+                    new PropertySet(Property.ARTIST_NAME,original.artist));
+            deleter.deleteRelationship(songID, Label.SONGNAME, oldArtistID, Label.ARTIST);
         }
 
         // set album ----------------------------------------------------------
         albumID = importer.createIfNotExists(_finder,
                 Label.ALBUM,Property.ALBUM_NAME,req.album);
         if(!req.sameAlbum()){
-            oldID = importer.createIfNotExists(_finder,
-                    Label.ALBUM,Property.ALBUM_NAME,original.album);
-            deleter.deleteRelationship(songID, Label.SONGNAME, oldID, Label.ALBUM);
+            oldAlbumID = _finder.findIDByProperty(Label.ALBUM,
+                    new PropertySet(Property.ALBUM_NAME,original.album));
+            deleter.deleteRelationship(songID, Label.SONGNAME, oldAlbumID, Label.ALBUM);
         }
         // set genre ----------------------------------------------------------
         genreID = importer.createIfNotExists(_finder,
                 Label.GENRE,Property.GENRE_NAME,req.genre);
         if(!req.sameGenre()){
-            oldID = importer.createIfNotExists(_finder,
-                    Label.GENRE,Property.GENRE_NAME,original.genre);
-            deleter.deleteRelationship(songID, Label.SONGNAME, oldID, Label.GENRE);
+            oldGenreID = _finder.findIDByProperty(Label.GENRE,
+                    new PropertySet(Property.GENRE_NAME,original.genre));
+            deleter.deleteRelationship(songID, Label.SONGNAME, oldGenreID, Label.GENRE);
         }
+        oldArtistID = oldArtistID >= 0 ? oldArtistID : artistID;
+        oldAlbumID = oldAlbumID >= 0 ? oldAlbumID : albumID;
+        oldGenreID = oldGenreID >= 0 ? oldGenreID : genreID;
 
+        removeInvalidRelationships(oldArtistID, oldAlbumID, oldGenreID);
         importer.createAllRelationships(albumID, artistID, genreID, songID);
+    }
+
+    /**
+     * Checks to ensure that all any changes to non-song labels update
+     * their relationships appropriately.
+     * @param artistID
+     * @param albumID
+     * @param genreID
+     */
+    private void removeInvalidRelationships(int artistID, int albumID, int genreID){
+        Deleter deleter = new Deleter(_session);
+
+        if(!hasValidRelationship(artistID,albumID)){
+            deleter.deleteRelationship(artistID,Label.ARTIST,albumID,Label.ALBUM);
+        }
+        if(!hasValidRelationship(artistID,genreID)){
+            deleter.deleteRelationship(artistID,Label.ARTIST,genreID,Label.GENRE);
+        }
+        if(!hasValidRelationship(genreID,albumID)){
+            deleter.deleteRelationship(genreID,Label.GENRE,albumID,Label.ALBUM);
+        }
+    }
+
+    private boolean hasValidRelationship(int id1, int id2){
+        StatementResult result = _session.run("MATCH (n1)-[:"+Relation.HAS_SONG+"]->(m) MATCH (n2)-[:"
+                +Relation.HAS_SONG+"]->(m) WHERE id(n1)="+id1+" AND id(n2)="+id2+" RETURN count(m)");
+
+        return result.next().get(0).asInt() > 0;
     }
 
     private void setPropertyByID(int ID, List<PropertySet> sets){
