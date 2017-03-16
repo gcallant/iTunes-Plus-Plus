@@ -5,6 +5,7 @@ import Utilities.Sanitizer;
 import Values.Label;
 import Values.Property;
 import Values.PropertySet;
+import Values.Relation;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -30,6 +31,7 @@ public class ControllerNodeEdit {
     private Controller parentController;
     private String label;
     private String original;
+    String path;
 
     @FXML private javafx.scene.control.Label nodeType;
     @FXML private TextField input;
@@ -49,6 +51,8 @@ public class ControllerNodeEdit {
 
     @FXML protected void handleBtnSubmit(MouseEvent event){
         int id = -1;
+        int songID = finder.findIDByProperty(Label.SONGNAME,
+                new PropertySet(Property.FILENAME, path));
         PropertySet set = null;
         String newValue = input.getText();
 
@@ -59,21 +63,23 @@ public class ControllerNodeEdit {
         switch (label){
             case Label.ALBUM :
                 set = new PropertySet(Property.ALBUM_NAME,original);
-                id = finder.findIDByProperty(label,set);
+                id = finder.findIDByRelationship(Label.SONGNAME,
+                        songID, Relation.HAS_ALBUM);
                 break;
             case Label.ARTIST :
                 set = new PropertySet(Property.ARTIST_NAME,original);
-                id = finder.findIDByProperty(label,set);
+                id = finder.findIDByRelationship(Label.SONGNAME,
+                        songID, Relation.HAS_ARTIST);
                 break;
             case Label.GENRE :
                 set = new PropertySet(Property.GENRE_NAME,original);
-                id = finder.findIDByProperty(label,set);
+                id = finder.findIDByRelationship(Label.SONGNAME,
+                        songID, Relation.HAS_GENRE);
                 break;
             default:
                 System.err.println("Unable to process label");
                 handleBtnCancel(event);
         }
-
         set.val = newValue;
         long startTime = System.currentTimeMillis();
         editor.editNode(label,id,set);
@@ -92,6 +98,7 @@ public class ControllerNodeEdit {
 
     void initData(String label, String path) throws IOException {
         this.label = label;
+        this.path = path;
         ID3Object id3 = new ID3Object(new File(path));
         switch (label){
             case Label.ALBUM :
