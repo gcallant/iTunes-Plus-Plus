@@ -29,40 +29,24 @@ public class Music
    public static Music musicFactory(Record record)
    {
       List<Value> values = record.values();
-      StringBuilder song = new StringBuilder();
-      StringBuilder artist = new StringBuilder();
-      StringBuilder album = new StringBuilder();
-      StringBuilder genre = new StringBuilder();
-      StringBuilder filePath = new StringBuilder();
-      for(Value v : values)
-      {
-         getValue(v, "songName", song);
-         getValue(v, "artistName", artist);
-         getValue(v, "albumName", album);
-         getValue(v, "genreName", genre);
-         getValue(v, "fileLocation", filePath);
-      }
-      return new Music(song.toString(), artist.toString(), album.toString(), genre.toString(), filePath.toString());
-   }
+      String song = null;
+      String filePath = null;
+      String artist = null;
+      String album = null;
+      String genre = null;
 
-   private static void getValue(Value value, String key, StringBuilder data)
-   {
-      String s;
-      s = value.get(key, "");
-      if(!s.isEmpty())
-      {
-         data.append(s);
-      }
+      song = values.get(0).asString();
+      filePath = values.get(1).asString();
+      artist = values.get(2).asString();
+      album = values.get(3).asString();
+      genre = values.get(4).asString();
+
+      return new Music(song, artist, album, genre, filePath);
    }
 
    public String getFilePath()
    {
       return filePath;
-   }
-
-   public void setFilePath(String filePath)
-   {
-      this.filePath = filePath;
    }
 
    public String getGenre()
@@ -101,8 +85,9 @@ public class Music
    }
 
    @Override
-   public boolean equals(Object music){
+   public boolean equals(Object music)
+   {
       Music that = (Music) music;
-      return this.getFilePath().equals(that.getFilePath());
+      return this.filePath.equals(that.filePath);
    }
 }

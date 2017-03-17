@@ -21,7 +21,8 @@ public class Main extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      Parent root = FXMLLoader.load(getClass().getResource("/itunes++.fxml"));
+      System.out.println(getClass().getResource(".."));
+      Parent root = FXMLLoader.load(getClass().getResource("../itunes++.fxml"));
 
       Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
 

@@ -52,7 +52,7 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", artist));
-      String query = "MATCH (a : artist)-[:hasSong]->(s)-[:hasAlbum]->(al)-[:hasGenre]->(g) WHERE a.artistName =~ $like RETURN a,s,al,g;";
+      String query = "MATCH (a : artist)-[:hasSong]->(s)-[:hasAlbum]->(al)-[:hasGenre]->(g) WHERE a.artistName =~ $like RETURN s.songName,s.fileLocation, a.artistName, al.albumName,g.genreName;";
       return session.run(query, params);
    }
 
@@ -60,7 +60,7 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", song));
-      String query = "MATCH (s : song)-[:hasArtist]->(a)-[:hasAlbum]->(al)-[:hasGenre]->(g) WHERE s.songName =~ $like RETURN s,a,al,g;";
+      String query = "MATCH (s : song)-[:hasArtist]->(a)-[:hasAlbum]->(al)-[:hasGenre]->(g) WHERE s.songName =~ $like RETURN s.songName,s.fileLocation, a.artistName, al.albumName,g.genreName;";
       return session.run(query, params);
    }
 
@@ -68,7 +68,7 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", album));
-      String query = "MATCH (al : album)-[:hasArtist]->(a)-[:hasSong]->(s)-[:hasGenre]->(g) WHERE al.albumName =~ $like RETURN al,a,s,g;";
+      String query = "MATCH (al : album)-[:hasArtist]->(a)-[:hasSong]->(s)-[:hasGenre]->(g) WHERE al.albumName =~ $like RETURN s.songName,s.fileLocation, a.artistName, al.albumName,g.genreName;";
       return session.run(query, params);
    }
 
@@ -76,7 +76,7 @@ public class SearchQuery
    {
       Map<String, Object> params = new HashMap<>(1);
       params.put("like", String.format("(?i).*%s.*", genre));
-      String query = "MATCH (g : genre)-[:hasArtist]->(a)-[:hasSong]->(s)-[:hasAlbum]->(al) WHERE g.genreName =~ $like RETURN al,a,s,g;";
+      String query = "MATCH (g : genre)-[:hasArtist]->(a)-[:hasSong]->(s)-[:hasAlbum]->(al) WHERE g.genreName =~ $like RETURN s.songName,s.fileLocation, a.artistName, al.albumName,g.genreName;";
       return session.run(query, params);
    }
 }
