@@ -18,7 +18,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="gui" />
         <module name="iTunes++" />
-        <module name="iTunes-Plus-Plus" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
